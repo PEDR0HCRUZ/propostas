@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposta · Pedro Kunz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--black:#111;--gray:#888;--light:#F5F4F1;--border:#E5E3DE;}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--black);line-height:1.6;}
+.site-header{padding:56px 28px 48px;max-width:720px;margin:0 auto;border-bottom:1px solid var(--border);}
+.header-title{font-size:clamp(28px,5vw,42px);font-weight:800;line-height:1.15;letter-spacing:-.5px;margin-bottom:20px;}
+.header-title em{font-style:normal;font-weight:400;color:var(--gray);display:block;font-size:.65em;letter-spacing:0;margin-bottom:6px;}
+.header-title strong{font-weight:800;display:block;}
+.header-meta{display:flex;flex-wrap:wrap;gap:28px;margin-top:28px;}
+.header-meta-item{display:flex;flex-direction:column;gap:3px;}
+.header-meta-item label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--gray);}
+.header-meta-item span{font-size:13px;font-weight:600;}
+.section{padding:64px 28px;max-width:720px;margin:0 auto;border-bottom:1px solid var(--border);}
+.section-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gray);margin-bottom:16px;}
+.section-heading{font-size:clamp(20px,4vw,28px);font-weight:800;line-height:1.25;letter-spacing:-.3px;margin-bottom:20px;}
+.section-body{font-size:14px;color:#555;line-height:1.8;max-width:560px;margin-bottom:28px;}
+.alert-list{display:flex;flex-direction:column;gap:10px;}
+.alert-item{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-radius:8px;background:var(--light);border:1px solid var(--border);}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.alert-text{font-size:13px;color:var(--black);line-height:1.5;}
+.alert-text strong{font-weight:700;display:block;margin-bottom:2px;}
+.alert-text span{color:var(--gray);font-size:12px;}
+.stat-highlight{display:flex;gap:32px;flex-wrap:wrap;margin-bottom:32px;}
+.stat-hl{display:flex;flex-direction:column;gap:4px;}
+.stat-hl .val{font-size:36px;font-weight:900;line-height:1;letter-spacing:-1.5px;}
+.stat-hl .lbl{font-size:11px;color:var(--gray);}
+.scores-grid{display:grid;gap:12px;margin-bottom:24px;}
+.score-chip{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.score-chip .val{font-size:22px;font-weight:900;letter-spacing:-1px;color:#E07800;}
+.score-chip .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gray);margin-top:2px;}
+.sitemap{margin-top:28px;display:flex;flex-direction:column;}
+.sitemap-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.sitemap-row:last-child{border-bottom:none;}
+.sitemap-page{padding:8px 14px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;min-width:120px;text-align:center;background:var(--light);color:#111;border:1px solid var(--border);}
+.sitemap-arrow{color:#ccc;font-size:14px;flex-shrink:0;}
+.sitemap-children{display:flex;flex-wrap:wrap;gap:6px;}
+.sitemap-child{background:#fff;border:1px solid var(--border);border-radius:4px;padding:5px 12px;font-size:11px;color:#555;white-space:nowrap;}
+.lp-sections{margin-top:28px;display:flex;flex-direction:column;}
+.lp-row{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);}
+.lp-row:last-child{border-bottom:none;}
+.lp-badge{padding:8px 14px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;min-width:140px;text-align:center;background:var(--light);color:#111;border:1px solid var(--border);}
+.lp-arrow{color:#ccc;font-size:14px;flex-shrink:0;margin-top:10px;}
+.lp-desc{font-size:13px;color:#555;line-height:1.6;padding-top:6px;}
+.check-two{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;}
+@media(max-width:540px){.check-two{grid-template-columns:1fr;}}
+.check-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+.check-item:last-child{border-bottom:none;}
+.check-circle{width:20px;height:20px;border-radius:50%;background:#111;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;}
+.check-circle::after{content:'✓';font-size:11px;font-weight:700;color:white;line-height:1;}
+.check-text{font-size:13.5px;color:var(--black);line-height:1.5;}
+.check-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.portfolio-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px;}
+@media(max-width:540px){.portfolio-grid{grid-template-columns:1fr;}}
+.portfolio-card{border:1px solid var(--border);border-radius:10px;padding:22px;text-decoration:none;color:inherit;display:block;}
+.portfolio-card-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:10px;}
+.portfolio-card-name{font-size:15px;font-weight:800;margin-bottom:6px;}
+.portfolio-card-desc{font-size:12px;color:var(--gray);line-height:1.5;margin-bottom:14px;}
+.portfolio-card-url{font-size:11px;color:#aaa;}
+.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px;}
+@media(max-width:560px){.option-grid{grid-template-columns:1fr;}}
+.option-card{border-radius:10px;padding:28px 24px;border:1px solid var(--border);}
+.option-card.featured{background:#111;border-color:#111;}
+.option-card-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:12px;}
+.option-price{font-size:36px;font-weight:900;line-height:1;letter-spacing:-1px;margin-bottom:6px;}
+.option-card.featured .option-price{color:#fff;}
+.option-meta{font-size:11px;color:#999;margin-bottom:20px;}
+.option-divider{border:none;border-top:1px solid var(--border);margin-bottom:16px;}
+.option-card.featured .option-divider{border-color:#1e1e1e;}
+.option-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+.option-list li{font-size:12.5px;line-height:1.4;}
+.option-list li::before{display:none;}
+.option-card.featured .option-list li{color:#ddd;}
+.price-note{margin-top:16px;font-size:12px;color:var(--gray);line-height:1.6;}
+.start-chips{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;}
+.start-chip{background:var(--light);border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:4px;}
+.start-chip-num{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);}
+.start-chip-label{font-size:13px;font-weight:700;}
+.start-chip-sub{font-size:11px;color:var(--gray);max-width:150px;line-height:1.4;margin-top:2px;}
+.page-footer{padding:28px;max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);font-size:11px;color:var(--gray);}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-title">
+    <em>Design e Desenvolvimento</em>
+    <strong>Monteiro</strong>
+  </div>
+  <div class="header-meta">
+    <div class="header-meta-item"><label>Preparado por</label><span>Pedro Kunz</span></div><div class="header-meta-item"><label>Data</label><span>Maio de 2026</span></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="section-num">01 · contexto</div>
+  <h2 class="section-heading"></h2>
+  <p class="section-body">A ideia para concepção do site para divulgação e venda do livro digital e físico escrito pelo Monteiro. O livro fala sobre proteção da criança e adolescente sobre abuso infantil, o livro aborda histórias reais.
+</br></br>
+Monteiro deseja um site vivo, com bastante animações e micro interações. Ele deseja também que o site tenha audio ativo assim que o usuário acessar o site.
+</br></br>
+O conteúdo do livro contém músicas autorais, dessas músicas sairam frases que estampam camisetas tais quais serão vendidas pelo site também. Uma interação desejada é que ao clicar ou acessar a página de um modelo de camiseta, ative o som de um trecho da canção citada na estampa.
+</br></br>
+Tanto a venda do livro como a venda das camisetas deve ser feita online.
+</p>
+</section>
+
+<section class="section">
+  <div class="section-num">02 · Portfólio</div>
+  <h2 class="section-heading">referencias do cliente</h2>
+  <p class="section-body">Projetos desenvolvidos com o mesmo cuidado visual e foco em resultado.</p>
+  <div class="portfolio-grid">
+    <a class="portfolio-card" href="https://www.dratharita.com.br/" target="_blank"><div class="portfolio-card-tag">Harmonização Orofacial · Florianópolis</div><div class="portfolio-card-name">Dra. Tharita</div><div class="portfolio-card-desc">Site para especialista em harmonização orofacial. Design sofisticado, galeria de resultados e foco em conversão via WhatsApp.</div><div class="portfolio-card-url">www.dratharita.com.br ↗</div></a><a class="portfolio-card" href="https://clinicabarrosradiologia.com.br/" target="_blank"><div class="portfolio-card-tag">Radiologia · Paraná</div><div class="portfolio-card-name">Clínica Barros Radiologia</div><div class="portfolio-card-desc">Site institucional com estrutura clara, identidade visual profissional e otimizado para buscas no Google.</div><div class="portfolio-card-url">clinicabarrosradiologia.com.br ↗</div></a><a class="portfolio-card" href="https://danifigueiredo.com.br/intimamente-lp/" target="_blank"><div class="portfolio-card-tag">Landing Page · Moda Íntima</div><div class="portfolio-card-name">Intimamente · Dani Figueiredo</div><div class="portfolio-card-desc">Landing page de alta conversão para venda de produto. Design visual forte e condução estratégica até o clique.</div><div class="portfolio-card-url">danifigueiredo.com.br/intimamente-lp ↗</div></a><a class="portfolio-card" href="https://zenaviagens.com/" target="_blank"><div class="portfolio-card-tag">Agência de Viagens · Brasil</div><div class="portfolio-card-name">Zen Viagens</div><div class="portfolio-card-desc">Site para agência de viagens com apresentação de destinos, pacotes e canal direto para contato.</div><div class="portfolio-card-url">zenaviagens.com ↗</div></a>
+  </div>
+</section>
+<footer class="page-footer">
+  <span>Pedro Kunz</span>
+  <span>Maio de 2026</span>
+</footer>
+</body>
+</html>
