@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder de Propostas · Pedro Kunz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0D0D0D;
+  --surface: #141414;
+  --border: #222;
+  --gold: #C4A265;
+  --cream: #EDE7DA;
+  --muted: #555;
+  --text: #CCC;
+  --canvas-bg: #0f0f0f;
+  --card-head: #191919;
+  --pal-hover: #1c1c1c;
+  --pal-sep: #191919;
+  --input-bg: #0D0D0D;
+  --input-color: #EDE7DA;
+  --arr-bg: #111;
+  --drag-color: #333;
+  --preview-color: #444;
+}
+
+:root.light {
+  --bg: #F0EFEC;
+  --surface: #FFFFFF;
+  --border: #E0DDD8;
+  --gold: #A8823E;
+  --cream: #111111;
+  --muted: #999;
+  --text: #333;
+  --canvas-bg: #E8E6E1;
+  --card-head: #F5F4F1;
+  --pal-hover: #F5F4F1;
+  --pal-sep: #EBEBEB;
+  --input-bg: #F5F4F1;
+  --input-color: #111;
+  --arr-bg: #F5F4F1;
+  --drag-color: #CCC;
+  --preview-color: #AAA;
+}
+
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background .2s, color .2s; }
+
+/* TOP BAR */
+.topbar { height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 14px; flex-shrink: 0; }
+.topbar-logo { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); }
+.topbar-sep { flex: 1; }
+.topbar-saved { font-size: 10px; color: var(--muted); }
+.tbtn { font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; border: 1px solid var(--border); background: none; color: var(--muted); transition: .15s; }
+.tbtn:hover { color: var(--cream); border-color: #444; }
+.tbtn.primary { background: var(--gold); color: #111; border-color: var(--gold); font-weight: 700; }
+.tbtn.primary:hover { opacity: .85; }
+
+/* LAYOUT */
+.layout { display: flex; flex: 1; overflow: hidden; }
+
+/* PALETTE — col 1, fixa */
+#palette { width: 196px; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
+.pal-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); padding: 14px 14px 8px; }
+.pal-item { display: flex; align-items: center; gap: 9px; padding: 9px 14px; cursor: pointer; border-bottom: 1px solid var(--pal-sep); transition: background .1s; }
+.pal-item:hover { background: var(--pal-hover); }
+.pal-item:hover .pal-add { color: var(--gold); }
+.pal-icon { font-size: 14px; flex-shrink: 0; }
+.pal-name { font-size: 12px; color: var(--text); font-weight: 500; flex: 1; }
+.pal-add { font-size: 15px; color: var(--drag-color); transition: .1s; }
+
+/* WORK PANEL — col 2, retrátil (lista de blocos + editor) */
+#workpanel { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); transition: width .2s ease; }
+#workpanel.collapsed { width: 0; border-right: none; }
+
+/* BLOCK LIST (topo do workpanel) */
+#canvas { padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 42vh; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--surface); }
+.canvas-empty { padding: 20px 12px; text-align: center; }
+.canvas-empty-text { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+/* COLLAPSE TOGGLE */
+.wp-toggle { width: 18px; background: var(--surface); border: none; border-right: 1px solid var(--border); color: var(--muted); cursor: pointer; flex-shrink: 0; padding: 0; font-size: 8px; transition: background .15s, color .15s; }
+.wp-toggle:hover { background: var(--pal-hover); color: var(--cream); }
+
+/* LIVE PREVIEW — col 3 */
+#preview-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--canvas-bg); padding: 12px; gap: 0; }
+#live-frame { flex: 1; border: none; border-radius: 8px; background: white; width: 100%; }
+
+.bcard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color .15s; }
+.bcard:hover { border-color: var(--drag-color); }
+.bcard.selected { border-color: var(--gold); }
+.bcard.drag-over { border-top: 2px solid var(--gold); }
+.bcard-head { display: flex; align-items: center; gap: 9px; padding: 9px 12px; background: var(--card-head); cursor: pointer; }
+.bdrag { cursor: grab; color: var(--drag-color); font-size: 14px; padding: 0 2px; flex-shrink: 0; }
+.bdrag:active { cursor: grabbing; }
+.bcard-icon { font-size: 13px; }
+.bcard-label { font-size: 11px; font-weight: 600; color: var(--text); flex: 1; }
+.bcard-acts { display: flex; gap: 4px; }
+.bact { font-size: 10px; padding: 3px 7px; border-radius: 4px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; font-family: inherit; transition: .1s; }
+.bact:hover { color: var(--cream); border-color: var(--drag-color); }
+.bact.del:hover { color: #e55; border-color: #e55; }
+.bcard-preview { padding: 8px 12px; font-size: 11px; color: var(--preview-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* EDITOR (base do workpanel) */
+#editor { background: var(--surface); overflow-y: auto; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.ed-empty { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; font-size: 11px; color: var(--muted); line-height: 1.7; }
+.ed-head { padding: 13px 14px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--cream); display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.ed-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+/* FORM */
+.fg { display: flex; flex-direction: column; gap: 4px; }
+.fl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.fi, .ft { background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 12px; color: var(--input-color); font-family: inherit; outline: none; transition: border-color .15s; width: 100%; }
+.fi:focus, .ft:focus { border-color: var(--gold); }
+.ft { resize: vertical; min-height: 64px; line-height: 1.5; }
+.fdiv { border: none; border-top: 1px solid var(--border); margin: 2px 0; }
+
+/* ARRAY */
+.arr { display: flex; flex-direction: column; gap: 7px; }
+.arr-item { background: var(--arr-bg); border: 1px solid var(--border); border-radius: 6px; padding: 9px; display: flex; flex-direction: column; gap: 6px; }
+.arr-head { display: flex; align-items: center; gap: 6px; }
+.arr-title { font-size: 10px; font-weight: 700; color: #444; flex: 1; }
+.arr-rm { font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid #2a2a2a; background: none; color: var(--muted); cursor: pointer; font-family: inherit; }
+.arr-rm:hover { color: #e55; border-color: #e55; }
+.btn-add { font-size: 11px; padding: 7px; border-radius: 6px; border: 1px dashed #2a2a2a; background: none; color: var(--muted); cursor: pointer; font-family: inherit; transition: .15s; text-align: center; }
+.btn-add:hover { color: var(--gold); border-color: var(--gold); }
+.row2 { display: flex; gap: 6px; }
+.row2 .fi { flex: 1; min-width: 0; }
+
+/* SAVE MODAL */
+#save-modal { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.75); align-items: center; justify-content: center; padding: 24px; }
+#save-modal.open { display: flex; }
+.sm-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px 24px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; }
+.sm-title { font-size: 14px; font-weight: 700; color: var(--cream); }
+.sm-subtitle { font-size: 11px; color: var(--muted); margin-top: -6px; line-height: 1.5; }
+.sm-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">Pedro Kunz</span>
+  <span style="font-size:13px;font-weight:600;color:var(--cream)">Builder de Propostas</span>
+  <div class="topbar-sep"></div>
+  <span class="topbar-saved" id="save-status"></span>
+  <button class="tbtn" id="theme-btn" onclick="toggleTheme()" title="Alternar tema">☀️</button>
+  <a class="tbtn" href="index.html" style="text-decoration:none">← Propostas</a>
+  <button class="tbtn" onclick="newCanvas()">Novo</button>
+  <button class="tbtn" onclick="showPreview()">Visualizar</button>
+  <button class="tbtn primary" onclick="openSaveModal()">Salvar proposta →</button>
+</div>
+
+<div class="layout">
+  <aside id="palette"></aside>
+  <aside id="workpanel">
+    <div id="canvas"><div class="canvas-empty"><div class="canvas-empty-text">Adicione blocos da paleta</div></div></div>
+    <div id="editor"><div class="ed-empty">Selecione um bloco para editar seu conteúdo</div></div>
+  </aside>
+  <button class="wp-toggle" id="wp-toggle" onclick="toggleWorkPanel()" title="Recolher painel">◀</button>
+  <main id="preview-col">
+    <iframe id="live-frame" src="about:blank"></iframe>
+  </main>
+</div>
+
+<div id="save-modal">
+  <div class="sm-box">
+    <div class="sm-title" id="sm-title-text">Salvar proposta</div>
+    <div class="sm-subtitle">Os dados abaixo aparecem no painel. Os campos de cliente e valor são preenchidos automaticamente se houver um bloco Cabeçalho e Preço.</div>
+    <div class="fg"><div class="fl">Cliente *</div><input class="fi" id="sm-client" placeholder="Nome do cliente"></div>
+    <div class="fg"><div class="fl">Segmento / Nicho</div><input class="fi" id="sm-niche" placeholder="Ex: Psicologia · Florianópolis"></div>
+    <div class="fg"><div class="fl">Valor</div><input class="fi" id="sm-value" placeholder="R$ 599"></div>
+    <div class="fg"><div class="fl">Status</div>
+      <select class="fi" id="sm-status">
+        <option value="neg">Negociação</option>
+        <option value="env">Enviada</option>
+        <option value="ok">Fechada</option>
+        <option value="tpl">Template</option>
+      </select>
+    </div>
+    <div class="fg"><div class="fl">Data</div><input class="fi" id="sm-date" placeholder="Mai 2026"></div>
+    <div class="fg"><div class="fl">Slug (URL da proposta)</div><input class="fi" id="sm-slug" placeholder="estetica-integrada" oninput="this.value=slugify(this.value)"></div>
+    <div class="sm-actions">
+      <button class="tbtn primary" onclick="saveProposal()" style="flex:1" id="sm-save-btn">Salvar →</button>
+      <button class="tbtn" onclick="closeSaveModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================
+   THEME
+   ===================== */
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('pk_theme', isLight ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = isLight ? '🌙' : '☀️';
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('pk_theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = '🌙';
+    });
+  }
+})();
+
+/* =====================
+   BLOCK DEFINITIONS
+   ===================== */
+
+const BLOCKS = {
+
+  header: {
+    label: 'Cabeçalho',
+    icon: '📄',
+    def: {
+      supertitle: 'Redesign de site',
+      title: 'Nome do Cliente',
+      meta: [
+        { label: 'Preparado por', value: 'Pedro Kunz' },
+        { label: 'Para', value: '' },
+        { label: 'Segmento', value: '' },
+        { label: 'Data', value: 'Maio de 2026' }
+      ]
+    },
+    preview: d => d.title,
+    render: (d) => `
+<header class="site-header">
+  <div class="header-title">
+    <em>${d.supertitle}</em>
+    <strong>${d.title}</strong>
+  </div>
+  <div class="header-meta">
+    ${d.meta.filter(m => m.value).map(m => `<div class="header-meta-item"><label>${m.label}</label><span>${m.value}</span></div>`).join('')}
+  </div>
+</header>`
+  },
+
+  diagnostico: {
+    label: 'Diagnóstico',
+    icon: '🔍',
+    def: {
+      heading: 'O que encontramos',
+      body: 'Texto de contexto do diagnóstico.',
+      alerts: [
+        { icon: '🔍', title: 'Título do problema', desc: 'Descrição do problema encontrado.' },
+        { icon: '📱', title: 'Segundo problema', desc: 'Descrição do segundo problema.' }
+      ]
+    },
+    preview: d => d.heading + ' · ' + d.alerts.length + ' alertas',
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Diagnóstico</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  ${d.body ? `<p class="section-body">${d.body}</p>` : ''}
+  <div class="alert-list">
+    ${d.alerts.map(a => `<div class="alert-item"><div class="alert-icon">${a.icon}</div><div class="alert-text"><strong>${a.title}</strong><span>${a.desc}</span></div></div>`).join('')}
+  </div>
+</section>`
+  },
+
+  stats: {
+    label: 'Números destaque',
+    icon: '📊',
+    def: {
+      heading: 'O que encontramos',
+      body: '',
+      alerts: [],
+      items: [
+        { value: '7K', label: 'seguidores no Instagram', muted: false },
+        { value: '0', label: 'páginas indexadas no Google', muted: true }
+      ]
+    },
+    preview: d => d.items.map(i => i.value).join(' · '),
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Diagnóstico</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  ${d.body ? `<p class="section-body">${d.body}</p>` : ''}
+  <div class="stat-highlight">
+    ${d.items.map(i => `<div class="stat-hl"><div class="val"${i.muted ? ' style="color:var(--gray);"' : ''}>${i.value}</div><div class="lbl">${i.label}</div></div>`).join('')}
+  </div>
+  ${d.alerts.length ? `<div class="alert-list">${d.alerts.map(a => `<div class="alert-item"><div class="alert-icon">${a.icon}</div><div class="alert-text"><strong>${a.title}</strong><span>${a.desc}</span></div></div>`).join('')}</div>` : ''}
+</section>`
+  },
+
+  pagespeed: {
+    label: 'PageSpeed',
+    icon: '⚡',
+    def: {
+      heading: 'O que encontramos',
+      body: 'Descrição dos problemas de performance.',
+      scores: [
+        { value: '64', label: 'Desempenho' },
+        { value: '59', label: 'Acessibilidade' },
+        { value: '70', label: 'Boas práticas' },
+        { value: '82', label: 'SEO' }
+      ],
+      alerts: [
+        { icon: '⚡', title: 'Core Web Vitals falhando', desc: 'Descrição.' }
+      ]
+    },
+    preview: d => 'Scores: ' + d.scores.map(s => s.value).join(' / '),
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Diagnóstico</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  ${d.body ? `<p class="section-body">${d.body}</p>` : ''}
+  <div class="scores-grid" style="grid-template-columns:repeat(${Math.min(d.scores.length,4)},1fr)">
+    ${d.scores.map(s => `<div class="score-chip"><div class="val">${s.value}</div><div class="lbl">${s.label}</div></div>`).join('')}
+  </div>
+  <div class="alert-list">
+    ${d.alerts.map(a => `<div class="alert-item"><div class="alert-icon">${a.icon}</div><div class="alert-text"><strong>${a.title}</strong><span>${a.desc}</span></div></div>`).join('')}
+  </div>
+</section>`
+  },
+
+  sitemap: {
+    label: 'Mapa do site',
+    icon: '🗺️',
+    def: {
+      heading: 'Estrutura do site',
+      body: 'Cada página com um propósito claro.',
+      rows: [
+        { page: 'Home', children: ['Hero + CTA', 'Serviços', 'Depoimentos'] },
+        { page: 'Sobre', children: ['História', 'Equipe'] },
+        { page: 'Contato', children: ['WhatsApp', 'Localização'] }
+      ]
+    },
+    preview: d => d.rows.map(r => r.page).join(' · '),
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Estrutura do site</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  ${d.body ? `<p class="section-body">${d.body}</p>` : ''}
+  <div class="sitemap">
+    ${d.rows.map(r => `<div class="sitemap-row"><div class="sitemap-page">${r.page}</div><div class="sitemap-arrow">→</div><div class="sitemap-children">${r.children.map(c => `<div class="sitemap-child">${c}</div>`).join('')}</div></div>`).join('')}
+  </div>
+</section>`
+  },
+
+  lpsections: {
+    label: 'Seções da LP',
+    icon: '📑',
+    def: {
+      heading: 'Como vai ser organizado',
+      body: 'Cada seção com um propósito claro na jornada do visitante.',
+      rows: [
+        { badge: 'Hero', desc: 'Apresentação principal com CTA direto.' },
+        { badge: 'Sobre', desc: 'Trajetória e diferenciais.' },
+        { badge: 'Depoimentos', desc: 'Prova social de clientes reais.' },
+        { badge: 'Contato', desc: 'WhatsApp, localização e redes sociais.' }
+      ]
+    },
+    preview: d => d.rows.map(r => r.badge).join(' · '),
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Estrutura da página</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  ${d.body ? `<p class="section-body">${d.body}</p>` : ''}
+  <div class="lp-sections">
+    ${d.rows.map(r => `<div class="lp-row"><div class="lp-badge">${r.badge}</div><div class="lp-arrow">→</div><div class="lp-desc">${r.desc}</div></div>`).join('')}
+  </div>
+</section>`
+  },
+
+  checklist: {
+    label: 'O que está incluso',
+    icon: '✅',
+    def: {
+      heading: 'O que está incluso',
+      items: [
+        { text: 'Design exclusivo', sub: 'Visual feito para o seu negócio' },
+        { text: 'SEO configurado', sub: 'Indexação correta no Google' },
+        { text: 'Responsivo para celular e tablet', sub: 'Perfeito em qualquer tela' },
+        { text: 'Botão de WhatsApp fixo', sub: 'Visível em toda a página' },
+        { text: 'Google Analytics instalado', sub: 'Dados reais de quem visita' },
+        { text: '30 dias de suporte técnico', sub: 'Ajustes após a entrega' }
+      ]
+    },
+    preview: d => d.items.slice(0,3).map(i => i.text).join(', '),
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · O que está incluso</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  <div class="checklist check-two">
+    ${d.items.map(i => `<div class="check-item"><div class="check-circle"></div><div><div class="check-text">${i.text}</div>${i.sub ? `<div class="check-sub">${i.sub}</div>` : ''}</div></div>`).join('')}
+  </div>
+</section>`
+  },
+
+  portfolio: {
+    label: 'Portfólio',
+    icon: '🖼️',
+    def: {
+      sectionLabel: 'Portfólio',
+      heading: 'Trabalhos anteriores',
+      body: 'Projetos desenvolvidos com o mesmo cuidado visual e foco em resultado.',
+      cards: [
+        { tag: 'Harmonização Orofacial · Florianópolis', name: 'Dra. Tharita', desc: 'Site para especialista em harmonização orofacial. Design sofisticado, galeria de resultados e foco em conversão via WhatsApp.', url: 'https://www.dratharita.com.br/' },
+        { tag: 'Radiologia · Paraná', name: 'Clínica Barros Radiologia', desc: 'Site institucional com estrutura clara, identidade visual profissional e otimizado para buscas no Google.', url: 'https://clinicabarrosradiologia.com.br/' },
+        { tag: 'Landing Page · Moda Íntima', name: 'Intimamente · Dani Figueiredo', desc: 'Landing page de alta conversão para venda de produto. Design visual forte e condução estratégica até o clique.', url: 'https://danifigueiredo.com.br/intimamente-lp/' },
+        { tag: 'Agência de Viagens · Brasil', name: 'Zen Viagens', desc: 'Site para agência de viagens com apresentação de destinos, pacotes e canal direto para contato.', url: 'https://zenaviagens.com/' }
+      ]
+    },
+    preview: d => d.cards.map(c => c.name).join(' · '),
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · ${d.sectionLabel || 'Portfólio'}</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  ${d.body ? `<p class="section-body">${d.body}</p>` : ''}
+  <div class="portfolio-grid">
+    ${d.cards.map(c => `<a class="portfolio-card" href="${c.url}" target="_blank"><div class="portfolio-card-tag">${c.tag}</div><div class="portfolio-card-name">${c.name}</div><div class="portfolio-card-desc">${c.desc}</div><div class="portfolio-card-url">${c.url.replace(/https?:\/\//,'').replace(/\/$/,'')} ↗</div></a>`).join('')}
+  </div>
+</section>`
+  },
+
+  precounico: {
+    label: 'Preço único',
+    icon: '💰',
+    def: {
+      heading: 'Prazo e investimento',
+      tag: 'Projeto completo',
+      price: 'R$ 599',
+      meta: 'À vista · WordPress + Elementor',
+      items: [
+        'Concepção e aprovação do design',
+        'Desenvolvimento e aprovação final',
+        'Otimização de SEO e performance',
+        'Site interativo, com movimento',
+        'Hospedagem inclusa no primeiro ano',
+        '30 dias de suporte técnico',
+        'Entrega em até 14 dias úteis'
+      ],
+      note: 'Parcelamento em até 12x no cartão com juros da maquininha.'
+    },
+    preview: d => d.price + ' · ' + d.tag,
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Prazo e investimento</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  <div class="option-card featured" style="margin-top:32px;">
+    <div class="option-card-tag">${d.tag}</div>
+    <div class="option-price">${d.price}</div>
+    <div class="option-meta">${d.meta}</div>
+    <hr class="option-divider">
+    <ul class="option-list">${d.items.map(i => `<li>${i}</li>`).join('')}</ul>
+  </div>
+  ${d.note ? `<p class="price-note">${d.note}</p>` : ''}
+</section>`
+  },
+
+  precoduplo: {
+    label: 'Preço duplo',
+    icon: '💳',
+    def: {
+      heading: 'Prazo e investimento',
+      optA: {
+        tag: 'Com referência',
+        price: 'R$ 599',
+        meta: 'À vista · WordPress + Elementor',
+        items: ['Design baseado na referência', 'Otimização de SEO e performance', '7 dias de suporte técnico', 'Entrega em até 7 dias úteis']
+      },
+      optB: {
+        tag: 'Projeto completo',
+        price: 'R$ 1.199',
+        meta: 'À vista · WordPress + Elementor',
+        items: ['Concepção e aprovação do design', 'Desenvolvimento e aprovação final', 'Site interativo, com movimento', '30 dias de suporte técnico', 'Entrega em até 14 dias úteis']
+      },
+      note: 'Parcelamento em até 12x no cartão com juros da maquininha.'
+    },
+    preview: d => d.optA.price + ' ou ' + d.optB.price,
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Prazo e investimento</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  <div class="option-grid">
+    <div class="option-card">
+      <div class="option-card-tag">${d.optA.tag}</div>
+      <div class="option-price" style="color:#111;">${d.optA.price}</div>
+      <div class="option-meta">${d.optA.meta}</div>
+      <hr class="option-divider">
+      <ul class="option-list">${d.optA.items.map(i => `<li style="color:#555;">${i}</li>`).join('')}</ul>
+    </div>
+    <div class="option-card featured">
+      <div class="option-card-tag">${d.optB.tag}</div>
+      <div class="option-price">${d.optB.price}</div>
+      <div class="option-meta">${d.optB.meta}</div>
+      <hr class="option-divider">
+      <ul class="option-list">${d.optB.items.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>
+  </div>
+  ${d.note ? `<p class="price-note">${d.note}</p>` : ''}
+</section>`
+  },
+
+  passos: {
+    label: 'Próximos passos',
+    icon: '🚀',
+    def: {
+      heading: 'Próximos passos',
+      steps: [
+        { num: 'Passo 1', label: 'Aprovação do orçamento', sub: 'Confirmação e pagamento de entrada' },
+        { num: 'Passo 2', label: 'Envio dos materiais', sub: 'Fotos, logo e informações do negócio' },
+        { num: 'Passo 3', label: 'Início do projeto', sub: 'Design apresentado em até 3 dias úteis' }
+      ]
+    },
+    preview: d => d.steps.map(s => s.label).join(' · '),
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · Para começar</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  <div class="start-chips">
+    ${d.steps.map(s => `<div class="start-chip"><div class="start-chip-num">${s.num}</div><div class="start-chip-label">${s.label}</div><div class="start-chip-sub">${s.sub}</div></div>`).join('')}
+  </div>
+</section>`
+  },
+
+  textlivre: {
+    label: 'Texto livre',
+    icon: '📝',
+    def: {
+      sectionLabel: 'Informações',
+      heading: 'Título da seção',
+      body: 'Conteúdo da seção. Edite livremente.'
+    },
+    preview: d => d.heading,
+    render: (d, n) => `
+<section class="section">
+  <div class="section-num">${n} · ${d.sectionLabel}</div>
+  <h2 class="section-heading">${d.heading}</h2>
+  ${d.body ? `<p class="section-body">${d.body}</p>` : ''}
+</section>`
+  }
+
+};
+
+/* =====================
+   STATE
+   ===================== */
+
+let state = { blocks: [], sel: null, dragFrom: null };
+
+const uid = () => Math.random().toString(36).slice(2,8);
+const clone = x => JSON.parse(JSON.stringify(x));
+
+function save() {
+  localStorage.setItem('pk_builder_v2', JSON.stringify(state.blocks));
+  const el = document.getElementById('save-status');
+  if (el) { el.textContent = 'Salvo'; setTimeout(() => el.textContent = '', 1500); }
+}
+
+function load() {
+  const raw = localStorage.getItem('pk_builder_v2');
+  if (raw) { try { state.blocks = JSON.parse(raw); } catch(e) {} }
+}
+
+/* =====================
+   OPERATIONS
+   ===================== */
+
+function addBlock(type) {
+  const def = BLOCKS[type];
+  if (!def) return;
+  const b = { id: uid(), type, data: clone(def.def) };
+  state.blocks.push(b);
+  state.sel = b.id;
+  save(); renderAll();
+}
+
+function removeBlock(id) {
+  state.blocks = state.blocks.filter(b => b.id !== id);
+  if (state.sel === id) state.sel = null;
+  save(); renderAll();
+}
+
+function moveBlock(id, dir) {
+  const i = state.blocks.findIndex(b => b.id === id);
+  const j = i + dir;
+  if (j < 0 || j >= state.blocks.length) return;
+  [state.blocks[i], state.blocks[j]] = [state.blocks[j], state.blocks[i]];
+  save(); renderCanvas();
+}
+
+function selBlock(id) {
+  state.sel = id;
+  renderCanvas();
+  renderEditor();
+}
+
+function newCanvas() {
+  if (state.blocks.length && !confirm('Limpar tudo e começar do zero?')) return;
+  state.blocks = []; state.sel = null;
+  save(); renderAll();
+}
+
+/* =====================
+   DRAG AND DROP
+   ===================== */
+
+function onDragStart(e, idx) {
+  state.dragFrom = idx;
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragOver(e, idx) {
+  e.preventDefault();
+  document.querySelectorAll('.bcard').forEach(el => el.classList.remove('drag-over'));
+  const cards = document.querySelectorAll('.bcard');
+  if (cards[idx]) cards[idx].classList.add('drag-over');
+}
+function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function onDrop(e, toIdx) {
+  e.preventDefault();
+  document.querySelectorAll('.bcard').forEach(el => el.classList.remove('drag-over'));
+  const from = state.dragFrom;
+  if (from === null || from === toIdx) return;
+  const [moved] = state.blocks.splice(from, 1);
+  state.blocks.splice(toIdx, 0, moved);
+  state.dragFrom = null;
+  save(); renderCanvas();
+}
+
+/* =====================
+   HELPERS
+   ===================== */
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fg(label, html) {
+  return `<div class="fg"><div class="fl">${label}</div>${html}</div>`;
+}
+function fi(val, cb) {
+  return `<input class="fi" value="${esc(val)}" onchange="${cb}">`;
+}
+function ft(val, cb) {
+  return `<textarea class="ft" onchange="${cb}">${esc(val)}</textarea>`;
+}
+
+/* =====================
+   RENDER PALETTE
+   ===================== */
+
+function renderPalette() {
+  document.getElementById('palette').innerHTML =
+    `<div class="pal-label">Blocos</div>` +
+    Object.entries(BLOCKS).map(([type, def]) =>
+      `<div class="pal-item" onclick="addBlock('${type}')">
+        <span class="pal-icon">${def.icon}</span>
+        <span class="pal-name">${def.label}</span>
+        <span class="pal-add">+</span>
+      </div>`
+    ).join('');
+}
+
+/* =====================
+   RENDER CANVAS
+   ===================== */
+
+function renderCanvas() {
+  const el = document.getElementById('canvas');
+  if (!state.blocks.length) {
+    el.innerHTML = `<div class="canvas-empty"><div class="canvas-empty-text">Adicione blocos da paleta</div></div>`;
+    updateLivePreview();
+    return;
+  }
+  el.innerHTML = state.blocks.map((b, idx) => {
+    const def = BLOCKS[b.type];
+    const sel = state.sel === b.id;
+    return `<div class="bcard${sel?' selected':''}" id="bc-${b.id}"
+      draggable="true"
+      ondragstart="onDragStart(event,${idx})"
+      ondragover="onDragOver(event,${idx})"
+      ondrop="onDrop(event,${idx})"
+      ondragleave="onDragLeave(event)">
+      <div class="bcard-head" onclick="selBlock('${b.id}')">
+        <span class="bdrag">⠿</span>
+        <span class="bcard-icon">${def.icon}</span>
+        <span class="bcard-label">${def.label}</span>
+        <div class="bcard-acts" onclick="event.stopPropagation()">
+          <button class="bact" onclick="moveBlock('${b.id}',-1)">↑</button>
+          <button class="bact" onclick="moveBlock('${b.id}',1)">↓</button>
+          <button class="bact del" onclick="removeBlock('${b.id}')">✕</button>
+        </div>
+      </div>
+      <div class="bcard-preview">${def.preview(b.data)}</div>
+    </div>`;
+  }).join('');
+  updateLivePreview();
+}
+
+/* =====================
+   RENDER EDITOR
+   ===================== */
+
+function renderEditor() {
+  const el = document.getElementById('editor');
+  const b = state.blocks.find(b => b.id === state.sel);
+  if (!b) { el.innerHTML = `<div class="ed-empty">Selecione um bloco para editar seu conteúdo</div>`; return; }
+  const def = BLOCKS[b.type];
+  el.innerHTML = `<div class="ed-head">${def.icon} ${def.label}</div><div class="ed-body">${editorForm(b)}</div>`;
+}
+
+function editorForm(b) {
+  const id = b.id, d = b.data;
+
+  switch(b.type) {
+
+    case 'header': return `
+      ${fg('Subtítulo', fi(d.supertitle, `upd('${id}','supertitle',this.value)`))}
+      ${fg('Título', fi(d.title, `upd('${id}','title',this.value)`))}
+      <hr class="fdiv"><div class="fl">Meta</div>
+      ${d.meta.map((m,i) => `<div class="row2">
+        <input class="fi" style="max-width:90px" value="${esc(m.label)}" onchange="updMetaL('${id}',${i},this.value)">
+        <input class="fi" value="${esc(m.value)}" onchange="updMetaV('${id}',${i},this.value)">
+      </div>`).join('')}`;
+
+    case 'diagnostico': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Texto', ft(d.body, `upd('${id}','body',this.value)`))}
+      <hr class="fdiv"><div class="fl">Alertas</div>
+      <div class="arr">
+        ${d.alerts.map((a,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-rm" onclick="rmAlert('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(a.icon)}" placeholder="Emoji" onchange="updA('${id}',${i},'icon',this.value)">
+          <input class="fi" value="${esc(a.title)}" placeholder="Título" onchange="updA('${id}',${i},'title',this.value)">
+          <textarea class="ft" style="min-height:50px" onchange="updA('${id}',${i},'desc',this.value)">${esc(a.desc)}</textarea>
+        </div>`).join('')}
+        <button class="btn-add" onclick="addAlert('${id}')">+ Alerta</button>
+      </div>`;
+
+    case 'stats': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Texto', ft(d.body, `upd('${id}','body',this.value)`))}
+      <hr class="fdiv"><div class="fl">Números</div>
+      <div class="arr">
+        ${d.items.map((it,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Número ${i+1}</span><button class="arr-rm" onclick="rmStat('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(it.value)}" placeholder="Ex: 7K" onchange="updStat('${id}',${i},'value',this.value)">
+          <input class="fi" value="${esc(it.label)}" placeholder="Label" onchange="updStat('${id}',${i},'label',this.value)">
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;">
+            <input type="checkbox" ${it.muted?'checked':''} onchange="updStat('${id}',${i},'muted',this.checked)"> Exibir em cinza
+          </label>
+        </div>`).join('')}
+        <button class="btn-add" onclick="addStat('${id}')">+ Número</button>
+      </div>
+      <hr class="fdiv"><div class="fl">Alertas (opcional)</div>
+      <div class="arr">
+        ${d.alerts.map((a,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-rm" onclick="rmStatAlert('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(a.icon)}" placeholder="Emoji" onchange="updStatAlert('${id}',${i},'icon',this.value)">
+          <input class="fi" value="${esc(a.title)}" placeholder="Título" onchange="updStatAlert('${id}',${i},'title',this.value)">
+          <textarea class="ft" style="min-height:50px" onchange="updStatAlert('${id}',${i},'desc',this.value)">${esc(a.desc)}</textarea>
+        </div>`).join('')}
+        <button class="btn-add" onclick="addStatAlert('${id}')">+ Alerta</button>
+      </div>`;
+
+    case 'pagespeed': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Texto', ft(d.body, `upd('${id}','body',this.value)`))}
+      <hr class="fdiv"><div class="fl">Scores</div>
+      ${d.scores.map((s,i) => `<div class="row2">
+        <input class="fi" style="max-width:70px" value="${esc(s.value)}" placeholder="64" onchange="updScore('${id}',${i},'value',this.value)">
+        <input class="fi" value="${esc(s.label)}" placeholder="Label" onchange="updScore('${id}',${i},'label',this.value)">
+      </div>`).join('')}
+      <hr class="fdiv"><div class="fl">Alertas</div>
+      <div class="arr">
+        ${d.alerts.map((a,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-rm" onclick="rmPSAlert('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(a.icon)}" placeholder="Emoji" onchange="updPSAlert('${id}',${i},'icon',this.value)">
+          <input class="fi" value="${esc(a.title)}" placeholder="Título" onchange="updPSAlert('${id}',${i},'title',this.value)">
+          <textarea class="ft" style="min-height:50px" onchange="updPSAlert('${id}',${i},'desc',this.value)">${esc(a.desc)}</textarea>
+        </div>`).join('')}
+        <button class="btn-add" onclick="addPSAlert('${id}')">+ Alerta</button>
+      </div>`;
+
+    case 'sitemap': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Texto', ft(d.body, `upd('${id}','body',this.value)`))}
+      <hr class="fdiv"><div class="fl">Páginas</div>
+      <div class="arr">
+        ${d.rows.map((r,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Página ${i+1}</span><button class="arr-rm" onclick="rmSiteRow('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(r.page)}" placeholder="Nome" onchange="updSiteRow('${id}',${i},'page',this.value)">
+          <input class="fi" value="${esc(r.children.join(', '))}" placeholder="Filhos separados por vírgula" onchange="updSiteChildren('${id}',${i},this.value)">
+        </div>`).join('')}
+        <button class="btn-add" onclick="addSiteRow('${id}')">+ Página</button>
+      </div>`;
+
+    case 'lpsections': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Texto', ft(d.body, `upd('${id}','body',this.value)`))}
+      <hr class="fdiv"><div class="fl">Seções</div>
+      <div class="arr">
+        ${d.rows.map((r,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Seção ${i+1}</span><button class="arr-rm" onclick="rmLPRow('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(r.badge)}" placeholder="Nome" onchange="updLPRow('${id}',${i},'badge',this.value)">
+          <textarea class="ft" style="min-height:50px" onchange="updLPRow('${id}',${i},'desc',this.value)">${esc(r.desc)}</textarea>
+        </div>`).join('')}
+        <button class="btn-add" onclick="addLPRow('${id}')">+ Seção</button>
+      </div>`;
+
+    case 'checklist': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      <hr class="fdiv"><div class="fl">Itens</div>
+      <div class="arr">
+        ${d.items.map((it,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Item ${i+1}</span><button class="arr-rm" onclick="rmCheck('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(it.text)}" placeholder="Texto" onchange="updCheck('${id}',${i},'text',this.value)">
+          <input class="fi" value="${esc(it.sub)}" placeholder="Subtexto (opcional)" onchange="updCheck('${id}',${i},'sub',this.value)">
+        </div>`).join('')}
+        <button class="btn-add" onclick="addCheck('${id}')">+ Item</button>
+      </div>`;
+
+    case 'portfolio': return `
+      ${fg('Label da seção', fi(d.sectionLabel || 'Portfólio', `upd('${id}','sectionLabel',this.value)`))}
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Texto', ft(d.body, `upd('${id}','body',this.value)`))}
+      <hr class="fdiv"><div class="fl">Projetos (máx. 4)</div>
+      <div class="arr">
+        ${d.cards.map((c,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Projeto ${i+1}</span><button class="arr-rm" onclick="rmCard('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(c.tag)}" placeholder="Tag" onchange="updCard('${id}',${i},'tag',this.value)">
+          <input class="fi" value="${esc(c.name)}" placeholder="Nome" onchange="updCard('${id}',${i},'name',this.value)">
+          <textarea class="ft" style="min-height:50px" onchange="updCard('${id}',${i},'desc',this.value)">${esc(c.desc)}</textarea>
+          <input class="fi" value="${esc(c.url)}" placeholder="URL" onchange="updCard('${id}',${i},'url',this.value)">
+        </div>`).join('')}
+        ${d.cards.length < 4 ? `<button class="btn-add" onclick="addCard('${id}')">+ Projeto</button>` : ''}
+      </div>`;
+
+    case 'precounico': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Tag', fi(d.tag, `upd('${id}','tag',this.value)`))}
+      ${fg('Preço', fi(d.price, `upd('${id}','price',this.value)`))}
+      ${fg('Meta', fi(d.meta, `upd('${id}','meta',this.value)`))}
+      <hr class="fdiv"><div class="fl">Itens inclusos</div>
+      <div class="arr">
+        ${d.items.map((it,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Item ${i+1}</span><button class="arr-rm" onclick="rmPItem('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(it)}" onchange="updPItem('${id}',${i},this.value)">
+        </div>`).join('')}
+        <button class="btn-add" onclick="addPItem('${id}')">+ Item</button>
+      </div>
+      ${fg('Nota rodapé', fi(d.note, `upd('${id}','note',this.value)`))}`;
+
+    case 'precoduplo': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      <hr class="fdiv"><div class="fl" style="color:#888">Opção A (clara)</div>
+      ${fg('Tag', fi(d.optA.tag, `updOpt('${id}','A','tag',this.value)`))}
+      ${fg('Preço', fi(d.optA.price, `updOpt('${id}','A','price',this.value)`))}
+      ${fg('Meta', fi(d.optA.meta, `updOpt('${id}','A','meta',this.value)`))}
+      <div class="fl">Itens A</div>
+      <div class="arr">
+        ${d.optA.items.map((it,i) => `<div class="row2"><input class="fi" value="${esc(it)}" onchange="updOptItem('${id}','A',${i},this.value)"><button class="arr-rm" onclick="rmOptItem('${id}','A',${i})">✕</button></div>`).join('')}
+        <button class="btn-add" onclick="addOptItem('${id}','A')">+ Item A</button>
+      </div>
+      <hr class="fdiv"><div class="fl" style="color:#888">Opção B (destaque)</div>
+      ${fg('Tag', fi(d.optB.tag, `updOpt('${id}','B','tag',this.value)`))}
+      ${fg('Preço', fi(d.optB.price, `updOpt('${id}','B','price',this.value)`))}
+      ${fg('Meta', fi(d.optB.meta, `updOpt('${id}','B','meta',this.value)`))}
+      <div class="fl">Itens B</div>
+      <div class="arr">
+        ${d.optB.items.map((it,i) => `<div class="row2"><input class="fi" value="${esc(it)}" onchange="updOptItem('${id}','B',${i},this.value)"><button class="arr-rm" onclick="rmOptItem('${id}','B',${i})">✕</button></div>`).join('')}
+        <button class="btn-add" onclick="addOptItem('${id}','B')">+ Item B</button>
+      </div>
+      <hr class="fdiv">
+      ${fg('Nota rodapé', fi(d.note, `upd('${id}','note',this.value)`))}`;
+
+    case 'passos': return `
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      <hr class="fdiv"><div class="fl">Passos</div>
+      <div class="arr">
+        ${d.steps.map((s,i) => `<div class="arr-item">
+          <div class="arr-head"><span class="arr-title">Passo ${i+1}</span><button class="arr-rm" onclick="rmStep('${id}',${i})">✕</button></div>
+          <input class="fi" value="${esc(s.num)}" placeholder="Passo 1" onchange="updStep('${id}',${i},'num',this.value)">
+          <input class="fi" value="${esc(s.label)}" placeholder="Título" onchange="updStep('${id}',${i},'label',this.value)">
+          <input class="fi" value="${esc(s.sub)}" placeholder="Subtexto" onchange="updStep('${id}',${i},'sub',this.value)">
+        </div>`).join('')}
+        <button class="btn-add" onclick="addStep('${id}')">+ Passo</button>
+      </div>`;
+
+    case 'textlivre': return `
+      ${fg('Label da seção', fi(d.sectionLabel, `upd('${id}','sectionLabel',this.value)`))}
+      ${fg('Título', fi(d.heading, `upd('${id}','heading',this.value)`))}
+      ${fg('Texto', ft(d.body, `upd('${id}','body',this.value)`))}`;
+
+    default: return `<div style="color:var(--muted);font-size:12px;">Editor não disponível.</div>`;
+  }
+}
+
+/* =====================
+   UPDATE HELPERS
+   ===================== */
+
+function getB(id) { return state.blocks.find(b => b.id === id); }
+function upd(id, k, v) { const b=getB(id); if(b){b.data[k]=v; save(); renderCanvas();} }
+function updMetaL(id,i,v) { const b=getB(id); b.data.meta[i].label=v; save(); renderCanvas(); }
+function updMetaV(id,i,v) { const b=getB(id); b.data.meta[i].value=v; save(); renderCanvas(); }
+
+// Alerts
+function updA(id,i,k,v){ const b=getB(id); b.data.alerts[i][k]=v; save(); renderCanvas(); }
+function rmAlert(id,i){ const b=getB(id); b.data.alerts.splice(i,1); save(); renderAll(); }
+function addAlert(id){ const b=getB(id); b.data.alerts.push({icon:'📌',title:'Novo alerta',desc:'Descrição.'}); save(); renderAll(); }
+
+// Stats block alerts
+function updStatAlert(id,i,k,v){ const b=getB(id); b.data.alerts[i][k]=v; save(); renderCanvas(); }
+function rmStatAlert(id,i){ const b=getB(id); b.data.alerts.splice(i,1); save(); renderAll(); }
+function addStatAlert(id){ const b=getB(id); b.data.alerts.push({icon:'📌',title:'Novo alerta',desc:'Descrição.'}); save(); renderAll(); }
+
+// Stats
+function updStat(id,i,k,v){ const b=getB(id); b.data.items[i][k]=v; save(); renderCanvas(); }
+function rmStat(id,i){ const b=getB(id); b.data.items.splice(i,1); save(); renderAll(); }
+function addStat(id){ const b=getB(id); b.data.items.push({value:'0',label:'novo stat',muted:false}); save(); renderAll(); }
+
+// PageSpeed
+function updScore(id,i,k,v){ const b=getB(id); b.data.scores[i][k]=v; save(); renderCanvas(); }
+function updPSAlert(id,i,k,v){ const b=getB(id); b.data.alerts[i][k]=v; save(); renderCanvas(); }
+function rmPSAlert(id,i){ const b=getB(id); b.data.alerts.splice(i,1); save(); renderAll(); }
+function addPSAlert(id){ const b=getB(id); b.data.alerts.push({icon:'⚡',title:'Novo alerta',desc:'Descrição.'}); save(); renderAll(); }
+
+// Sitemap
+function updSiteRow(id,i,k,v){ const b=getB(id); b.data.rows[i][k]=v; save(); renderCanvas(); }
+function updSiteChildren(id,i,v){ const b=getB(id); b.data.rows[i].children=v.split(',').map(s=>s.trim()).filter(Boolean); save(); renderCanvas(); }
+function rmSiteRow(id,i){ const b=getB(id); b.data.rows.splice(i,1); save(); renderAll(); }
+function addSiteRow(id){ const b=getB(id); b.data.rows.push({page:'Nova página',children:[]}); save(); renderAll(); }
+
+// LP sections
+function updLPRow(id,i,k,v){ const b=getB(id); b.data.rows[i][k]=v; save(); renderCanvas(); }
+function rmLPRow(id,i){ const b=getB(id); b.data.rows.splice(i,1); save(); renderAll(); }
+function addLPRow(id){ const b=getB(id); b.data.rows.push({badge:'Nova seção',desc:'Descrição.'}); save(); renderAll(); }
+
+// Checklist
+function updCheck(id,i,k,v){ const b=getB(id); b.data.items[i][k]=v; save(); renderCanvas(); }
+function rmCheck(id,i){ const b=getB(id); b.data.items.splice(i,1); save(); renderAll(); }
+function addCheck(id){ const b=getB(id); b.data.items.push({text:'Novo item',sub:''}); save(); renderAll(); }
+
+// Portfolio
+function updCard(id,i,k,v){ const b=getB(id); b.data.cards[i][k]=v; save(); renderCanvas(); }
+function rmCard(id,i){ const b=getB(id); b.data.cards.splice(i,1); save(); renderAll(); }
+function addCard(id){ const b=getB(id); b.data.cards.push({tag:'Segmento',name:'Nome',desc:'Descrição.',url:'https://'}); save(); renderAll(); }
+
+// Price single
+function updPItem(id,i,v){ const b=getB(id); b.data.items[i]=v; save(); renderCanvas(); }
+function rmPItem(id,i){ const b=getB(id); b.data.items.splice(i,1); save(); renderAll(); }
+function addPItem(id){ const b=getB(id); b.data.items.push('Novo item'); save(); renderAll(); }
+
+// Price duplo
+function updOpt(id,opt,k,v){ const b=getB(id); b.data['opt'+opt][k]=v; save(); renderCanvas(); }
+function updOptItem(id,opt,i,v){ const b=getB(id); b.data['opt'+opt].items[i]=v; save(); renderCanvas(); }
+function rmOptItem(id,opt,i){ const b=getB(id); b.data['opt'+opt].items.splice(i,1); save(); renderAll(); }
+function addOptItem(id,opt){ const b=getB(id); b.data['opt'+opt].items.push('Novo item'); save(); renderAll(); }
+
+// Steps
+function updStep(id,i,k,v){ const b=getB(id); b.data.steps[i][k]=v; save(); renderCanvas(); }
+function rmStep(id,i){ const b=getB(id); b.data.steps.splice(i,1); save(); renderAll(); }
+function addStep(id){ const b=getB(id); b.data.steps.push({num:`Passo ${b.data.steps.length+1}`,label:'Novo passo',sub:''}); save(); renderAll(); }
+
+/* =====================
+   RENDER ALL
+   ===================== */
+
+function renderAll() { renderCanvas(); renderEditor(); }
+
+/* =====================
+   PREVIEW + EXPORT
+   ===================== */
+
+const CSS = `
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--black:#111;--gray:#888;--light:#F5F4F1;--border:#E5E3DE;}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--black);line-height:1.6;}
+.site-header{padding:56px 28px 48px;max-width:720px;margin:0 auto;border-bottom:1px solid var(--border);}
+.header-title{font-size:clamp(28px,5vw,42px);font-weight:800;line-height:1.15;letter-spacing:-.5px;margin-bottom:20px;}
+.header-title em{font-style:normal;font-weight:400;color:var(--gray);display:block;font-size:.65em;letter-spacing:0;margin-bottom:6px;}
+.header-title strong{font-weight:800;display:block;}
+.header-meta{display:flex;flex-wrap:wrap;gap:28px;margin-top:28px;}
+.header-meta-item{display:flex;flex-direction:column;gap:3px;}
+.header-meta-item label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--gray);}
+.header-meta-item span{font-size:13px;font-weight:600;}
+.section{padding:64px 28px;max-width:720px;margin:0 auto;border-bottom:1px solid var(--border);}
+.section-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gray);margin-bottom:16px;}
+.section-heading{font-size:clamp(20px,4vw,28px);font-weight:800;line-height:1.25;letter-spacing:-.3px;margin-bottom:20px;}
+.section-body{font-size:14px;color:#555;line-height:1.8;max-width:560px;margin-bottom:28px;}
+.alert-list{display:flex;flex-direction:column;gap:10px;}
+.alert-item{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-radius:8px;background:var(--light);border:1px solid var(--border);}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.alert-text{font-size:13px;color:var(--black);line-height:1.5;}
+.alert-text strong{font-weight:700;display:block;margin-bottom:2px;}
+.alert-text span{color:var(--gray);font-size:12px;}
+.stat-highlight{display:flex;gap:32px;flex-wrap:wrap;margin-bottom:32px;}
+.stat-hl{display:flex;flex-direction:column;gap:4px;}
+.stat-hl .val{font-size:36px;font-weight:900;line-height:1;letter-spacing:-1.5px;}
+.stat-hl .lbl{font-size:11px;color:var(--gray);}
+.scores-grid{display:grid;gap:12px;margin-bottom:24px;}
+.score-chip{background:var(--light);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.score-chip .val{font-size:22px;font-weight:900;letter-spacing:-1px;color:#E07800;}
+.score-chip .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--gray);margin-top:2px;}
+.sitemap{margin-top:28px;display:flex;flex-direction:column;}
+.sitemap-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.sitemap-row:last-child{border-bottom:none;}
+.sitemap-page{padding:8px 14px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;min-width:120px;text-align:center;background:var(--light);color:#111;border:1px solid var(--border);}
+.sitemap-arrow{color:#ccc;font-size:14px;flex-shrink:0;}
+.sitemap-children{display:flex;flex-wrap:wrap;gap:6px;}
+.sitemap-child{background:#fff;border:1px solid var(--border);border-radius:4px;padding:5px 12px;font-size:11px;color:#555;white-space:nowrap;}
+.lp-sections{margin-top:28px;display:flex;flex-direction:column;}
+.lp-row{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);}
+.lp-row:last-child{border-bottom:none;}
+.lp-badge{padding:8px 14px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;min-width:140px;text-align:center;background:var(--light);color:#111;border:1px solid var(--border);}
+.lp-arrow{color:#ccc;font-size:14px;flex-shrink:0;margin-top:10px;}
+.lp-desc{font-size:13px;color:#555;line-height:1.6;padding-top:6px;}
+.check-two{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;}
+@media(max-width:540px){.check-two{grid-template-columns:1fr;}}
+.check-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+.check-item:last-child{border-bottom:none;}
+.check-circle{width:20px;height:20px;border-radius:50%;background:#111;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;}
+.check-circle::after{content:'✓';font-size:11px;font-weight:700;color:white;line-height:1;}
+.check-text{font-size:13.5px;color:var(--black);line-height:1.5;}
+.check-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+.portfolio-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px;}
+@media(max-width:540px){.portfolio-grid{grid-template-columns:1fr;}}
+.portfolio-card{border:1px solid var(--border);border-radius:10px;padding:22px;text-decoration:none;color:inherit;display:block;}
+.portfolio-card-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:10px;}
+.portfolio-card-name{font-size:15px;font-weight:800;margin-bottom:6px;}
+.portfolio-card-desc{font-size:12px;color:var(--gray);line-height:1.5;margin-bottom:14px;}
+.portfolio-card-url{font-size:11px;color:#aaa;}
+.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px;}
+@media(max-width:560px){.option-grid{grid-template-columns:1fr;}}
+.option-card{border-radius:10px;padding:28px 24px;border:1px solid var(--border);}
+.option-card.featured{background:#111;border-color:#111;}
+.option-card-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:12px;}
+.option-price{font-size:36px;font-weight:900;line-height:1;letter-spacing:-1px;margin-bottom:6px;}
+.option-card.featured .option-price{color:#fff;}
+.option-meta{font-size:11px;color:#999;margin-bottom:20px;}
+.option-divider{border:none;border-top:1px solid var(--border);margin-bottom:16px;}
+.option-card.featured .option-divider{border-color:#1e1e1e;}
+.option-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+.option-list li{font-size:12.5px;line-height:1.4;}
+.option-list li::before{display:none;}
+.option-card.featured .option-list li{color:#ddd;}
+.price-note{margin-top:16px;font-size:12px;color:var(--gray);line-height:1.6;}
+.start-chips{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;}
+.start-chip{background:var(--light);border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:4px;}
+.start-chip-num{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);}
+.start-chip-label{font-size:13px;font-weight:700;}
+.start-chip-sub{font-size:11px;color:var(--gray);max-width:150px;line-height:1.4;margin-top:2px;}
+.page-footer{padding:28px;max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);font-size:11px;color:var(--gray);}
+`;
+
+function buildHTML() {
+  let n = 0;
+  const body = state.blocks.map(b => {
+    const def = BLOCKS[b.type];
+    if (b.type === 'header') return def.render(b.data);
+    n++;
+    return def.render(b.data, String(n).padStart(2,'0'));
+  }).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposta · Pedro Kunz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>${CSS}</style>
+</head>
+<body>
+${body}
+<footer class="page-footer">
+  <span>Pedro Kunz</span>
+  <span>Maio de 2026</span>
+</footer>
+</body>
+</html>`;
+}
+
+function showPreview() {
+  if (!state.blocks.length) { alert('Adicione pelo menos um bloco.'); return; }
+  const win = window.open('', '_blank');
+  win.document.write(buildHTML());
+  win.document.close();
+}
+
+function updateLivePreview() {
+  const frame = document.getElementById('live-frame');
+  if (!frame) return;
+  if (!state.blocks.length) {
+    frame.srcdoc = '<html><body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;color:#bbb;font-size:13px;">Adicione blocos para ver o preview</body></html>';
+    return;
+  }
+  frame.srcdoc = buildHTML();
+}
+
+function toggleWorkPanel() {
+  const wp = document.getElementById('workpanel');
+  const btn = document.getElementById('wp-toggle');
+  const collapsed = wp.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '▶' : '◀';
+  btn.title = collapsed ? 'Expandir painel' : 'Recolher painel';
+}
+
+function exportHTML() {
+  if (!state.blocks.length) { alert('Adicione pelo menos um bloco.'); return; }
+  const html = buildHTML();
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'proposta.html';
+  a.click();
+}
+
+/* =====================
+   PROPOSALS STORAGE
+   ===================== */
+
+function getProposals() {
+  try { return JSON.parse(localStorage.getItem('pk_proposals') || '[]'); } catch { return []; }
+}
+function setProposals(arr) {
+  localStorage.setItem('pk_proposals', JSON.stringify(arr));
+}
+
+function slugify(s) {
+  return String(s).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function openSaveModal() {
+  if (!state.blocks.length) { alert('Adicione pelo menos um bloco antes de salvar.'); return; }
+
+  // Auto-preenche a partir dos blocos existentes
+  const headerBlock = state.blocks.find(b => b.type === 'header');
+  const priceBlock  = state.blocks.find(b => b.type === 'precounico' || b.type === 'precoduplo');
+
+  if (headerBlock) {
+    const title = headerBlock.data.title || '';
+    document.getElementById('sm-client').value = title;
+    if (title) document.getElementById('sm-slug').value = slugify(title);
+    const seg  = (headerBlock.data.meta || []).find(m => m.label === 'Segmento');
+    const date = (headerBlock.data.meta || []).find(m => m.label === 'Data');
+    if (seg && seg.value)   document.getElementById('sm-niche').value = seg.value;
+    if (date && date.value) document.getElementById('sm-date').value  = date.value;
+  }
+  if (priceBlock) {
+    const price = priceBlock.type === 'precounico'
+      ? priceBlock.data.price
+      : (priceBlock.data.optB || {}).price;
+    if (price) document.getElementById('sm-value').value = price;
+  }
+
+  // Se estiver editando proposta existente, carrega os dados dela
+  const editId = new URLSearchParams(window.location.search).get('id');
+  if (editId) {
+    const existing = getProposals().find(p => p.id === editId);
+    if (existing) {
+      document.getElementById('sm-client').value = existing.client || '';
+      document.getElementById('sm-niche').value  = existing.niche  || '';
+      document.getElementById('sm-value').value  = existing.value  || '';
+      document.getElementById('sm-status').value = existing.status || 'neg';
+      document.getElementById('sm-date').value   = existing.date   || '';
+      document.getElementById('sm-slug').value   = existing.slug   || '';
+    }
+    document.getElementById('sm-title-text').textContent = 'Atualizar proposta';
+    document.getElementById('sm-save-btn').textContent   = 'Atualizar →';
+  } else {
+    document.getElementById('sm-title-text').textContent = 'Salvar proposta';
+    document.getElementById('sm-save-btn').textContent   = 'Salvar →';
+    if (!document.getElementById('sm-date').value) {
+      document.getElementById('sm-date').value = 'Mai 2026';
+    }
+  }
+
+  document.getElementById('save-modal').classList.add('open');
+}
+
+function closeSaveModal() {
+  document.getElementById('save-modal').classList.remove('open');
+}
+
+function saveProposal() {
+  const client = document.getElementById('sm-client').value.trim();
+  if (!client) { alert('Digite o nome do cliente.'); return; }
+
+  const editId = new URLSearchParams(window.location.search).get('id');
+  const proposals = getProposals();
+  const existing  = editId ? proposals.find(p => p.id === editId) : null;
+
+  const proposal = {
+    id:        existing ? existing.id : uid(),
+    client,
+    niche:     document.getElementById('sm-niche').value.trim(),
+    value:     document.getElementById('sm-value').value.trim(),
+    status:    document.getElementById('sm-status').value,
+    date:      document.getElementById('sm-date').value.trim(),
+    slug:      document.getElementById('sm-slug').value.trim() || null,
+    createdAt: existing ? existing.createdAt : new Date().toISOString().slice(0, 10),
+    updatedAt: new Date().toISOString().slice(0, 10),
+    blocks:    clone(state.blocks),
+    html:      buildHTML()
+  };
+
+  if (existing) {
+    const idx = proposals.findIndex(p => p.id === editId);
+    proposals[idx] = proposal;
+  } else {
+    proposals.unshift(proposal);
+  }
+
+  setProposals(proposals);
+  window.location.href = 'index.html';
+}
+
+// Fecha modal clicando fora
+document.getElementById('save-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSaveModal();
+});
+
+/* =====================
+   INIT
+   ===================== */
+
+// Resolve parâmetros de URL antes de carregar
+(function handleURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get('id');
+  const isNew  = params.get('new');
+
+  if (isNew) {
+    // Começa do zero
+    localStorage.removeItem('pk_builder_v2');
+    return;
+  }
+
+  if (editId) {
+    // Carrega os blocos de uma proposta existente
+    try {
+      const p = getProposals().find(p => p.id === editId);
+      if (p && p.blocks) {
+        // Salva direto no storage para o load() pegar logo em seguida
+        localStorage.setItem('pk_builder_v2', JSON.stringify(p.blocks));
+      }
+    } catch(e) {}
+  }
+})();
+
+load();
+renderPalette();
+renderAll();
+updateLivePreview();
+
+// sync theme button icon after render
+(function() {
+  const btn = document.getElementById('theme-btn');
+  if (btn && document.documentElement.classList.contains('light')) btn.textContent = '🌙';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposta · Márcia Lira Escola de Estética</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --black: #111;
+  --gray:  #888;
+  --light: #F5F4F1;
+  --border: #E5E3DE;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #fff;
+  color: var(--black);
+  line-height: 1.6;
+}
+
+.site-header { padding: 56px 28px 48px; max-width: 720px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.header-title { font-size: clamp(28px, 5vw, 42px); font-weight: 800; line-height: 1.15; letter-spacing: -.5px; margin-bottom: 20px; }
+.header-title em { font-style: normal; font-weight: 400; color: var(--gray); display: block; font-size: .65em; letter-spacing: 0; margin-bottom: 6px; }
+.header-title strong { font-weight: 800; display: block; }
+.header-meta { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 28px; }
+.header-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.header-meta-item label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); }
+.header-meta-item span { font-size: 13px; font-weight: 600; }
+
+.section { padding: 64px 28px; max-width: 720px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.section-num { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gray); margin-bottom: 16px; }
+.section-heading { font-size: clamp(20px, 4vw, 28px); font-weight: 800; line-height: 1.25; letter-spacing: -.3px; margin-bottom: 20px; }
+.section-body { font-size: 14px; color: #555; line-height: 1.8; max-width: 560px; margin-bottom: 28px; }
+
+/* STATS */
+.stat-highlight { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 32px; }
+.stat-hl { display: flex; flex-direction: column; gap: 4px; }
+.stat-hl .val { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -1.5px; color: var(--black); }
+.stat-hl .lbl { font-size: 11px; color: var(--gray); }
+
+/* ALERTAS */
+.alert-list { display: flex; flex-direction: column; gap: 10px; }
+.alert-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 8px; background: var(--light); border: 1px solid var(--border); }
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-text { font-size: 13px; color: var(--black); line-height: 1.5; }
+.alert-text strong { font-weight: 700; display: block; margin-bottom: 2px; }
+.alert-text span { color: var(--gray); font-size: 12px; }
+
+/* SEÇÕES DA LP */
+.lp-sections { margin-top: 28px; display: flex; flex-direction: column; }
+.lp-row { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.lp-row:last-child { border-bottom: none; }
+.lp-badge { padding: 8px 14px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; min-width: 140px; text-align: center; background: var(--light); color: #111; border: 1px solid var(--border); }
+.lp-arrow { color: #ccc; font-size: 14px; flex-shrink: 0; margin-top: 10px; }
+.lp-desc { font-size: 13px; color: #555; line-height: 1.6; padding-top: 6px; }
+
+/* CURSOS */
+.cursos-intro { font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 24px; max-width: 560px; }
+.cursos-categoria { margin-bottom: 22px; }
+.cursos-cat-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gray); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.cursos-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.curso-tag { background: var(--light); border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px; font-size: 12px; color: var(--black); }
+
+/* CHECKLIST */
+.check-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+@media (max-width: 540px) { .check-two { grid-template-columns: 1fr; } }
+.check-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.check-item:last-child { border-bottom: none; }
+.check-circle { width: 20px; height: 20px; border-radius: 50%; background: #111; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+.check-circle::after { content: '✓'; font-size: 11px; font-weight: 700; color: white; line-height: 1; }
+.check-text { font-size: 13.5px; color: var(--black); line-height: 1.5; }
+.check-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+/* PORTFÓLIO */
+.portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px; }
+@media (max-width: 540px) { .portfolio-grid { grid-template-columns: 1fr; } }
+.portfolio-card { border: 1px solid var(--border); border-radius: 10px; padding: 22px; text-decoration: none; color: inherit; display: block; transition: border-color .15s; }
+.portfolio-card:hover { border-color: #aaa; }
+.portfolio-card-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 10px; }
+.portfolio-card-name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+.portfolio-card-desc { font-size: 12px; color: var(--gray); line-height: 1.5; margin-bottom: 14px; }
+.portfolio-card-url { font-size: 11px; color: #aaa; }
+
+/* PRICING */
+.option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 32px; }
+@media (max-width: 560px) { .option-grid { grid-template-columns: 1fr; } }
+.option-card { border-radius: 10px; padding: 28px 24px; border: 1px solid var(--border); }
+.option-card.featured { background: var(--black); border-color: var(--black); }
+.option-card-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 12px; }
+.option-card.featured .option-card-tag { color: #999; }
+.option-price { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -1px; margin-bottom: 6px; }
+.option-card.featured .option-price { color: #fff; }
+.option-meta { font-size: 11px; color: var(--gray); margin-bottom: 20px; }
+.option-card.featured .option-meta { color: #999; }
+.option-divider { border: none; border-top: 1px solid var(--border); margin-bottom: 16px; }
+.option-card.featured .option-divider { border-color: #1e1e1e; }
+.option-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 20px; }
+.option-list li { font-size: 12.5px; line-height: 1.4; display: flex; gap: 10px; align-items: flex-start; }
+.option-list li::before { display: none; }
+.option-card.featured .option-list li { color: #ddd; }
+.price-note { margin-top: 16px; font-size: 12px; color: var(--gray); line-height: 1.6; }
+
+/* PRÓXIMOS PASSOS */
+.start-chips { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.start-chip { background: var(--light); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.start-chip-num { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); }
+.start-chip-label { font-size: 13px; font-weight: 700; }
+.start-chip-sub { font-size: 11px; color: var(--gray); max-width: 150px; line-height: 1.4; margin-top: 2px; }
+
+.page-footer { padding: 28px; max-width: 720px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); font-size: 11px; color: var(--gray); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-title">
+    <em>Landing page de cursos</em>
+    <strong>Márcia Lira Escola de Estética</strong>
+  </div>
+  <div class="header-meta">
+    <div class="header-meta-item"><label>Preparado por</label><span>Pedro Kunz</span></div>
+    <div class="header-meta-item"><label>Para</label><span>Márcia Lira</span></div>
+    <div class="header-meta-item"><label>Segmento</label><span>Escola de Estética · São Paulo</span></div>
+    <div class="header-meta-item"><label>Data</label><span>Maio de 2026</span></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="section-num">01 · Diagnóstico</div>
+  <h2 class="section-heading">O que encontramos</h2>
+  <p class="section-body">A Márcia Lira já tem autoridade real no mercado: mais de 2.500 alunos formados, 60 cursos e 15 anos de experiência. O problema é que o site atual não comunica nada disso. O visual é quadrado e enxuto demais para uma escola com esse histórico, e a plataforma usada (Google Sites) não tem nenhum poder de ranqueamento ou de conversão.</p>
+
+  <div class="stat-highlight">
+    <div class="stat-hl"><div class="val">2.5K</div><div class="lbl">alunos formados</div></div>
+    <div class="stat-hl"><div class="val">60+</div><div class="lbl">cursos oferecidos</div></div>
+    <div class="stat-hl"><div class="val">15</div><div class="lbl">anos de experiência</div></div>
+  </div>
+
+  <div class="alert-list">
+    <div class="alert-item">
+      <div class="alert-icon">🎨</div>
+      <div class="alert-text">
+        <strong>O visual não reflete a autoridade da escola</strong>
+        <span>Com 2.500 alunos formados e mais de 60 cursos, o site precisa transmitir confiança desde o primeiro segundo. O design atual não comunica esse nível.</span>
+      </div>
+    </div>
+    <div class="alert-item">
+      <div class="alert-icon">📉</div>
+      <div class="alert-text">
+        <strong>Google Sites não converte</strong>
+        <span>A plataforma atual não foi feita para vender. Não tem hierarquia visual, CTAs estratégicos, seção de depoimentos ou estrutura de LP. Visitante chega e vai embora sem agir.</span>
+      </div>
+    </div>
+    <div class="alert-item">
+      <div class="alert-icon">🔍</div>
+      <div class="alert-text">
+        <strong>Nenhuma presença no Google</strong>
+        <span>Google Sites tem autoridade de SEO praticamente nula. Quem pesquisa "curso de drenagem linfática em São Paulo" ou "escola de estética SP" não encontra a Márcia.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">02 · Estrutura da landing page</div>
+  <h2 class="section-heading">Como vai ser organizada</h2>
+  <p class="section-body">Uma página única de alto impacto, pensada para conduzir a visitante do primeiro scroll até o clique em "quero me inscrever". Cada dobra com um propósito claro.</p>
+
+  <div class="lp-sections">
+    <div class="lp-row">
+      <div class="lp-badge">Hero</div>
+      <div class="lp-arrow">→</div>
+      <div class="lp-desc">Headline forte, foto da Márcia, credenciais em destaque (2.500 alunos, 15 anos) e CTA principal para WhatsApp ou inscrição.</div>
+    </div>
+    <div class="lp-row">
+      <div class="lp-badge">Para quem é</div>
+      <div class="lp-arrow">→</div>
+      <div class="lp-desc">Quebra de objeção logo no início: deixa claro que os cursos são para iniciantes e para quem já atua na área.</div>
+    </div>
+    <div class="lp-row">
+      <div class="lp-badge">Cursos</div>
+      <div class="lp-arrow">→</div>
+      <div class="lp-desc">Grade visual com todos os cursos organizados por categoria. Cada card com nome, carga horária e botão de interesse.</div>
+    </div>
+    <div class="lp-row">
+      <div class="lp-badge">Sobre a Márcia</div>
+      <div class="lp-arrow">→</div>
+      <div class="lp-desc">Trajetória, formação, metodologia de ensino e números que constroem autoridade antes da tomada de decisão.</div>
+    </div>
+    <div class="lp-row">
+      <div class="lp-badge">Depoimentos</div>
+      <div class="lp-arrow">→</div>
+      <div class="lp-desc">Avaliações e resultados de ex-alunos. Prova social para quem ainda está na dúvida.</div>
+    </div>
+    <div class="lp-row">
+      <div class="lp-badge">Contato</div>
+      <div class="lp-arrow">→</div>
+      <div class="lp-desc">WhatsApp, localização, Instagram e Facebook. CTA final para fechar a inscrição.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">03 · Cursos</div>
+  <h2 class="section-heading">O que vai aparecer na página</h2>
+  <p class="cursos-intro">Todos os cursos serão apresentados diretamente na página, organizados por categoria, construídos no Elementor. Sem painel dinâmico, sem complicação para manter.</p>
+
+  <div class="cursos-categoria">
+    <div class="cursos-cat-label">Intensivos Faciais</div>
+    <div class="cursos-grid">
+      <span class="curso-tag">Microagulhamento e Dermapen</span>
+      <span class="curso-tag">Peeling Químico</span>
+      <span class="curso-tag">Mesoterapia</span>
+      <span class="curso-tag">Hydra Gloss Lips</span>
+      <span class="curso-tag">Jato de Plasma</span>
+      <span class="curso-tag">Limpeza de Pele</span>
+      <span class="curso-tag">Intensivo Facial</span>
+    </div>
+  </div>
+
+  <div class="cursos-categoria">
+    <div class="cursos-cat-label">Intensivos Corporais</div>
+    <div class="cursos-grid">
+      <span class="curso-tag">Intensivo Corporal</span>
+      <span class="curso-tag">Drenagem Linfática Manual</span>
+      <span class="curso-tag">Drenagem Linfática Pós Operatória</span>
+      <span class="curso-tag">Eletroterapia</span>
+      <span class="curso-tag">Intradermoterapia Pressurizada</span>
+      <span class="curso-tag">Intradermoterapia Bronzeadora</span>
+      <span class="curso-tag">Ventosaterapia</span>
+    </div>
+  </div>
+
+  <div class="cursos-categoria">
+    <div class="cursos-cat-label">Massagens</div>
+    <div class="cursos-grid">
+      <span class="curso-tag">Massagem Relaxante</span>
+      <span class="curso-tag">Massagem Modeladora</span>
+      <span class="curso-tag">Massagem com Pedras Quentes</span>
+      <span class="curso-tag">Bambuterapia</span>
+    </div>
+  </div>
+
+  <div class="cursos-categoria">
+    <div class="cursos-cat-label">Terapias e Outros</div>
+    <div class="cursos-grid">
+      <span class="curso-tag">Toxina Botulínica (Botox)</span>
+      <span class="curso-tag">Depilação com Cera Rolon</span>
+      <span class="curso-tag">Alongamento de Cílios</span>
+      <span class="curso-tag">Intensivo Capilar</span>
+      <span class="curso-tag">Fios de Seda</span>
+      <span class="curso-tag">Maquiagem</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">04 · O que está incluso</div>
+  <h2 class="section-heading">O que está incluso</h2>
+  <div class="check-two">
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Design exclusivo para a escola</div><div class="check-sub">Visual que transmite autoridade e confiança</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">SEO configurado na página</div><div class="check-sub">Meta description, título e indexação correta</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Todos os cursos na página</div><div class="check-sub">Organizados por categoria, construídos no Elementor</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Seção de depoimentos</div><div class="check-sub">Avaliações de alunos como prova social</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">CTAs estratégicos</div><div class="check-sub">Botões de contato em cada dobra da página</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Botão de WhatsApp fixo</div><div class="check-sub">Visível em qualquer ponto da página</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Google Analytics instalado</div><div class="check-sub">Dados reais de quem visita e converte</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Open Graph para redes sociais</div><div class="check-sub">Links com imagem e título ao compartilhar</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Responsivo para celular e tablet</div><div class="check-sub">Perfeito em qualquer tela</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">30 dias de suporte técnico</div><div class="check-sub">Ajustes e dúvidas no período pós-entrega</div></div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">05 · Portfólio</div>
+  <h2 class="section-heading">Trabalhos anteriores</h2>
+  <p class="section-body">Projetos desenvolvidos com o mesmo cuidado visual e foco em resultado.</p>
+  <div class="portfolio-grid">
+    <a class="portfolio-card" href="https://danifigueiredo.com.br/intimamente-lp/" target="_blank">
+      <div class="portfolio-card-tag">Landing Page · Moda Íntima</div>
+      <div class="portfolio-card-name">Intimamente · Dani Figueiredo</div>
+      <div class="portfolio-card-desc">Landing page de alta conversão para venda de produto. Design visual forte, hierarquia clara e condução estratégica até o clique.</div>
+      <div class="portfolio-card-url">danifigueiredo.com.br ↗</div>
+    </a>
+    <a class="portfolio-card" href="https://www.dratharita.com.br/" target="_blank">
+      <div class="portfolio-card-tag">Harmonização Orofacial · Florianópolis</div>
+      <div class="portfolio-card-name">Dra. Tharita</div>
+      <div class="portfolio-card-desc">Site para especialista em harmonização orofacial. Design sofisticado, galeria de resultados e foco em conversão via WhatsApp.</div>
+      <div class="portfolio-card-url">dratharita.com.br ↗</div>
+    </a>
+    <a class="portfolio-card" href="https://clinicabarrosradiologia.com.br/" target="_blank">
+      <div class="portfolio-card-tag">Radiologia · Paraná</div>
+      <div class="portfolio-card-name">Clínica Barros Radiologia</div>
+      <div class="portfolio-card-desc">Site institucional com estrutura clara, identidade visual profissional e otimizado para buscas no Google.</div>
+      <div class="portfolio-card-url">clinicabarrosradiologia.com.br ↗</div>
+    </a>
+    <a class="portfolio-card" href="https://zenaviagens.com/" target="_blank">
+      <div class="portfolio-card-tag">Agência de Viagens · Brasil</div>
+      <div class="portfolio-card-name">Zen Viagens</div>
+      <div class="portfolio-card-desc">Site para agência de viagens com apresentação de destinos, pacotes e canal direto para contato e reservas.</div>
+      <div class="portfolio-card-url">zenaviagens.com ↗</div>
+    </a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">06 · Prazo e investimento</div>
+  <h2 class="section-heading">Prazo e investimento</h2>
+  <div class="option-card featured" style="margin-top:32px;">
+    <div class="option-card-tag">Projeto completo · Landing page</div>
+    <div class="option-price">R$ 999</div>
+    <div class="option-meta">À vista · WordPress + Elementor</div>
+    <hr class="option-divider">
+    <ul class="option-list">
+      <li>Concepção e aprovação do design</li>
+      <li>Desenvolvimento e aprovação final</li>
+      <li>Otimização de SEO e performance</li>
+      <li>Site interativo, com movimento</li>
+      <li>Hospedagem + domínio inclusos no primeiro ano</li>
+      <li>30 dias de suporte técnico</li>
+      <li>Entrega em até 14 dias úteis</li>
+    </ul>
+  </div>
+  <p class="price-note">Parcelamento em até 12x no cartão com juros da maquininha.</p>
+</section>
+
+<section class="section">
+  <div class="section-num">07 · Para começar</div>
+  <h2 class="section-heading">Próximos passos</h2>
+  <div class="start-chips">
+    <div class="start-chip"><div class="start-chip-num">Passo 1</div><div class="start-chip-label">Aprovação do orçamento</div><div class="start-chip-sub">Confirmação e pagamento de entrada</div></div>
+    <div class="start-chip"><div class="start-chip-num">Passo 2</div><div class="start-chip-label">Envio dos materiais</div><div class="start-chip-sub">Fotos, logo e lista de cursos com descrições</div></div>
+    <div class="start-chip"><div class="start-chip-num">Passo 3</div><div class="start-chip-label">Início do projeto</div><div class="start-chip-sub">Design apresentado em até 3 dias úteis</div></div>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <span>Pedro Kunz</span>
+  <span>Proposta válida por 15 dias · Maio de 2026</span>
+</footer>
+
+</body>
+</html>

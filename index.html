@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propostas · Pedro Kunz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0D0D0D;
+  --card: #141414;
+  --border: #222;
+  --gold: #C4A265;
+  --cream: #EDE7DA;
+  --muted: #555;
+  --text: #CCC;
+  --row-sep: #191919;
+  --row-hover: #111111;
+  --sep: #1E1E1E;
+}
+
+:root.light {
+  --bg: #F0EFEC;
+  --card: #FFFFFF;
+  --border: #E0DDD8;
+  --gold: #A8823E;
+  --cream: #111111;
+  --muted: #999;
+  --text: #333;
+  --row-sep: #EBEBEB;
+  --row-hover: #F5F4F1;
+  --sep: #E8E6E1;
+}
+
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .2s, color .2s; }
+
+/* TOPBAR */
+.topbar { height: 52px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 28px; gap: 16px; }
+.tb-logo { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); flex-shrink: 0; }
+.tb-sep { flex: 1; }
+.tbtn { font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; border: 1px solid var(--border); background: none; color: var(--muted); transition: .15s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tbtn:hover { color: var(--cream); border-color: #444; }
+.tbtn.primary { background: var(--gold); color: #111; border-color: var(--gold); font-weight: 700; }
+.tbtn.primary:hover { opacity: .85; }
+
+/* BODY */
+.dash-body { max-width: 980px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* STATS */
+.stats { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+.stat-chip { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; min-width: 120px; }
+.stat-chip .val { font-size: 24px; font-weight: 800; color: var(--cream); line-height: 1; margin-bottom: 5px; }
+.stat-chip .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+
+/* SECTION TITLE */
+.section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--sep); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+.prop-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.prop-table thead tr { border-bottom: 1px solid var(--border); }
+.prop-table th { padding: 10px 14px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+.prop-table tbody tr { border-bottom: 1px solid var(--row-sep); transition: background .1s; }
+.prop-table tbody tr:hover { background: var(--row-hover); }
+.prop-table tbody tr:last-child { border-bottom: none; }
+.prop-table td { padding: 13px 14px; vertical-align: middle; }
+.client-name { font-weight: 600; color: var(--cream); }
+.client-niche { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.value { font-weight: 700; color: var(--cream); }
+.date-cell { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+/* STATUS SELECT — aparece como badge mas é editável */
+.status-select {
+  display: inline-block; cursor: pointer; font-family: inherit;
+  font-size: 10px; font-weight: 700; border-radius: 20px;
+  border: none; outline: none;
+  padding: 4px 22px 4px 10px;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath fill='%23888' d='M4 5L0 0h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 7px center;
+  background-size: 7px; transition: opacity .15s;
+}
+.status-select:hover { opacity: .75; }
+.status-select option { background: #1A1A1A; color: #CCC; font-weight: 600; }
+
+.s-neg { background: #2A2000; color: #E5A800; }
+.s-env { background: #001A2A; color: #4DA6FF; }
+.s-ok  { background: #0A2A0A; color: #4CAF50; }
+.s-tpl { background: #1A1A1A; color: #666;    }
+
+/* ACTIONS */
+.actions { display: flex; gap: 6px; align-items: center; }
+.btn-act { font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 6px; cursor: pointer; font-family: inherit; border: 1px solid var(--border); background: none; color: var(--muted); transition: color .15s, border-color .15s; text-decoration: none; display: inline-block; white-space: nowrap; }
+.btn-act:hover              { color: var(--cream); border-color: #444; }
+.btn-act.act-edit:hover     { color: var(--gold);  border-color: var(--gold); }
+.btn-act.act-open:hover     { color: var(--cream);  border-color: #444; }
+.btn-act.act-copy:hover     { color: var(--gold);   border-color: var(--gold); }
+.btn-act.act-copy.copied    { color: #4CAF50;       border-color: #4CAF50; }
+.btn-act.act-publish:hover  { color: #4CAF50;       border-color: #4CAF50; }
+.btn-act.act-export:hover   { color: #4DA6FF;       border-color: #4DA6FF; }
+.btn-act.act-delete:hover   { color: #e55;         border-color: #e55; }
+
+/* EMPTY STATE */
+.empty-state { padding: 80px 24px; text-align: center; }
+.empty-icon  { font-size: 36px; margin-bottom: 16px; }
+.empty-text  { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 24px; }
+
+/* TRASH */
+.trash-header { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 48px; padding-bottom: 10px; border-bottom: 1px solid var(--sep); user-select: none; }
+.trash-header-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); flex: 1; }
+.trash-count { font-size: 10px; font-weight: 700; background: #2a0a0a; color: #e55; border-radius: 20px; padding: 2px 8px; }
+.trash-chevron { font-size: 9px; color: var(--muted); transition: transform .2s; }
+.trash-chevron.open { transform: rotate(180deg); }
+#trash-body-wrap { display: none; margin-top: 4px; }
+#trash-body-wrap.open { display: block; }
+.trash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.trash-table td { padding: 12px 14px; vertical-align: middle; border-bottom: 1px solid var(--row-sep); }
+.trash-table tr:last-child td { border-bottom: none; }
+.trash-client { font-weight: 600; color: var(--muted); }
+.trash-niche  { font-size: 11px; color: var(--muted); opacity: .6; margin-top: 2px; }
+.trash-date   { font-size: 11px; color: var(--muted); opacity: .5; white-space: nowrap; }
+.btn-restore  { font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 6px; cursor: pointer; font-family: inherit; border: 1px solid var(--border); background: none; color: var(--muted); transition: color .15s, border-color .15s; white-space: nowrap; }
+.btn-restore:hover { color: #4CAF50; border-color: #4CAF50; }
+.btn-perm-del { font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 6px; cursor: pointer; font-family: inherit; border: 1px solid var(--border); background: none; color: var(--muted); transition: color .15s, border-color .15s; white-space: nowrap; }
+.btn-perm-del:hover { color: #e55; border-color: #e55; }
+
+/* MODALS SHARED */
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.75); align-items: center; justify-content: center; padding: 24px; }
+.modal-overlay.open { display: flex; }
+.cm-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 28px 24px; max-width: 340px; width: 100%; }
+.cm-title { font-size: 14px; font-weight: 700; color: var(--cream); margin-bottom: 10px; }
+.cm-body  { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 24px; }
+.cm-actions { display: flex; gap: 8px; }
+
+/* SETTINGS MODAL */
+.cfg-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 24px; width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 14px; }
+.cfg-title { font-size: 15px; font-weight: 800; color: var(--cream); }
+.cfg-steps { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.cfg-step { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.cfg-step a { color: var(--gold); text-decoration: none; }
+.cfg-step a:hover { text-decoration: underline; }
+.cfg-step strong { color: var(--text); }
+.cfg-actions { display: flex; gap: 8px; margin-top: 4px; }
+.cfg-note { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.btn-danger { background: #2a0a0a; color: #e55; border: 1px solid #3a1a1a; border-radius: 6px; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; flex: 1; transition: opacity .15s; }
+.btn-danger:hover { opacity: .85; }
+
+/* LOGIN */
+#login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg); }
+.login-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 40px 36px; width: 100%; max-width: 360px; }
+.login-logo  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); margin-bottom: 24px; }
+.login-title { font-size: 20px; font-weight: 800; color: var(--cream); margin-bottom: 28px; }
+.login-field { margin-bottom: 14px; }
+.login-field label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+.login-field input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 10px 14px; font-size: 14px; color: var(--cream); font-family: inherit; outline: none; transition: border-color .15s; }
+.login-field input:focus { border-color: var(--gold); }
+.login-btn { width: 100%; margin-top: 20px; background: var(--gold); color: #111; border: none; border-radius: 7px; padding: 11px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+.login-btn:hover { opacity: .85; }
+.login-error { margin-top: 14px; font-size: 12px; color: #C0392B; text-align: center; display: none; }
+.login-hint { margin-top: 12px; font-size: 11px; color: var(--muted); text-align: center; line-height: 1.6; }
+#dash-wrap { display: none; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Pedro Kunz</div>
+    <div class="login-title">Painel de Propostas</div>
+    <form onsubmit="handleLogin(event)">
+      <div class="login-field">
+        <label>Usuário</label>
+        <input type="text" id="u" autocomplete="username" placeholder="usuário">
+      </div>
+      <div class="login-field">
+        <label>Senha</label>
+        <input type="password" id="p" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="login-btn" type="submit">Entrar</button>
+      <div class="login-error" id="err">Usuário ou senha incorretos.</div>
+    </form>
+    <div class="login-hint">Acesso salvo por 30 dias.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash-wrap">
+
+<div class="topbar">
+  <span class="tb-logo">Pedro Kunz</span>
+  <div class="tb-sep"></div>
+  <button class="tbtn" onclick="importFromVercel()" title="Importar propostas do painel Vercel">⬇ Importar anteriores</button>
+  <a class="tbtn primary" href="builder.html?new=1">+ Nova proposta</a>
+  <a class="tbtn" href="builder.html">Abrir builder</a>
+  <button class="tbtn" id="theme-btn" onclick="toggleTheme()" title="Alternar tema">☀️</button>
+  <button class="tbtn" onclick="openSettings()" title="Configurar publicação automática">⚙</button>
+  <button class="tbtn" onclick="logout()" style="color:#e55">Sair</button>
+</div>
+
+<div class="dash-body">
+
+  <div class="stats" id="stats"></div>
+
+  <div class="section-title">Todas as propostas</div>
+
+  <div class="table-wrap" id="table-wrap">
+    <table class="prop-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Valor</th>
+          <th>Status</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="prop-body"></tbody>
+    </table>
+  </div>
+
+  <div id="empty-state" style="display:none" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <div class="empty-text">Nenhuma proposta ainda.<br>Crie a primeira no builder.</div>
+    <a class="tbtn primary" href="builder.html?new=1">+ Nova proposta</a>
+  </div>
+
+  <!-- LIXEIRA -->
+  <div id="trash-section" style="display:none">
+    <div class="trash-header" onclick="toggleTrash()">
+      <span class="trash-header-label">🗑 Lixeira</span>
+      <span class="trash-count" id="trash-count">0</span>
+      <span class="trash-chevron" id="trash-chevron">▼</span>
+    </div>
+    <div id="trash-body-wrap">
+      <table class="trash-table">
+        <tbody id="trash-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /#dash-body -->
+</div><!-- /#dash-wrap -->
+
+<div id="confirm-modal" class="modal-overlay">
+  <div class="cm-box">
+    <div class="cm-title">Excluir proposta?</div>
+    <div class="cm-body" id="cm-body">Essa ação não pode ser desfeita.</div>
+    <div class="cm-actions">
+      <button class="btn-danger" id="cm-confirm">Excluir</button>
+      <button class="tbtn" onclick="closeConfirm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="cfg-box">
+    <div class="cfg-title">⚙ Configurar publicação automática</div>
+
+    <div class="cfg-steps">
+      <div class="cfg-step"><strong>1.</strong> Crie um repositório no GitHub: <a href="https://github.com/new" target="_blank">github.com/new</a> — nome sugerido: <strong>propostas-pedrokunz</strong></div>
+      <div class="cfg-step"><strong>2.</strong> No terminal, dentro da pasta <strong>propostas-pedrokunz/</strong>, rode:<br><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px">git init &amp;&amp; git add . &amp;&amp; git commit -m "init" &amp;&amp; git remote add origin [url-do-repo] &amp;&amp; git push -u origin main</code></div>
+      <div class="cfg-step"><strong>3.</strong> Em <a href="https://vercel.com/dashboard" target="_blank">vercel.com</a>, conecte o projeto ao repositório GitHub (Settings → Git)</div>
+      <div class="cfg-step"><strong>4.</strong> Gere um token em <a href="https://github.com/settings/tokens/new?scopes=repo&description=propostas-pedrokunz" target="_blank">github.com/settings/tokens</a> — escopo: <strong>repo</strong></div>
+    </div>
+
+    <div class="fg"><div class="fl">GitHub Token</div><input class="fi" type="password" id="cfg-token" placeholder="ghp_..."></div>
+    <div class="fg"><div class="fl">Repositório (usuario/nome)</div><input class="fi" id="cfg-repo" placeholder="pedrokunz/propostas-pedrokunz"></div>
+    <div class="cfg-note">Após salvar, o botão <strong>↑ Publicar</strong> envia o HTML direto para o GitHub e o Vercel faz deploy automático em ~30 segundos.</div>
+
+    <div class="cfg-actions">
+      <button class="tbtn primary" onclick="saveSettings()" style="flex:1">Salvar configurações</button>
+      <button class="tbtn" onclick="closeSettings()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ── AUTH ── */
+const AUTH_KEY  = 'pk_auth_v2';
+const AUTH_DAYS = 30;
+
+function checkAuth() {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY);
+    if (!raw) return false;
+    const { expiry } = JSON.parse(raw);
+    if (Date.now() < expiry) return true;
+    localStorage.removeItem(AUTH_KEY);
+    return false;
+  } catch { return false; }
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value;
+  if (u === 'pedrokunz' && p === 'Peedro@123') {
+    localStorage.setItem(AUTH_KEY, JSON.stringify({
+      expiry: Date.now() + AUTH_DAYS * 864e5
+    }));
+    showDash();
+  } else {
+    document.getElementById('err').style.display = 'block';
+  }
+}
+
+function logout() {
+  localStorage.removeItem(AUTH_KEY);
+  document.getElementById('dash-wrap').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function showDash() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dash-wrap').style.display = 'block';
+  renderStats();
+  renderTable();
+  renderTrash();
+}
+
+/* ─────────────────────────────── */
+
+const STATUS_LABELS = { neg: 'Negociação', env: 'Enviada', ok: 'Fechada', tpl: 'Template' };
+const STATUS_CLASS  = { neg: 's-neg',       env: 's-env',   ok: 's-ok',   tpl: 's-tpl'   };
+
+function getProposals() {
+  try { return JSON.parse(localStorage.getItem('pk_proposals') || '[]'); } catch { return []; }
+}
+function setProposals(arr) {
+  localStorage.setItem('pk_proposals', JSON.stringify(arr));
+}
+
+/* ── STATS ── */
+function renderStats() {
+  const proposals = getProposals();
+  const real  = proposals.filter(p => p.status !== 'tpl');
+  const neg   = real.filter(p => p.status === 'neg').length;
+  const ok    = real.filter(p => p.status === 'ok').length;
+  const env   = real.filter(p => p.status === 'env').length;
+  const ltv   = real.reduce((s, p) => {
+    const n = parseInt((p.value || '').replace(/\D/g, ''));
+    return s + (isNaN(n) ? 0 : n);
+  }, 0);
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-chip"><div class="val">${real.length}</div><div class="lbl">Propostas</div></div>
+    <div class="stat-chip"><div class="val">${neg}</div><div class="lbl">Negociação</div></div>
+    <div class="stat-chip"><div class="val">${env}</div><div class="lbl">Enviadas</div></div>
+    <div class="stat-chip"><div class="val">${ok}</div><div class="lbl">Fechadas</div></div>
+    <div class="stat-chip"><div class="val">R$${ltv.toLocaleString('pt-BR')}</div><div class="lbl">Pipeline</div></div>
+  `;
+}
+
+/* ── TABLE ── */
+function renderTable() {
+  const proposals = getProposals();
+  const tbody = document.getElementById('prop-body');
+  const empty = document.getElementById('empty-state');
+  const tableWrap = document.getElementById('table-wrap');
+
+  if (!proposals.length) {
+    tableWrap.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  tableWrap.style.display = 'block';
+  empty.style.display = 'none';
+
+  const statusOpts = Object.entries(STATUS_LABELS).map(([v, l]) =>
+    `<option value="${v}">${l}</option>`
+  ).join('');
+
+  tbody.innerHTML = proposals.map(p => {
+    const cls      = STATUS_CLASS[p.status] || 's-tpl';
+    const hasBlocks = p.blocks && p.blocks.length > 0;
+    const editLabel = hasBlocks ? 'Editar' : 'Construir';
+    return `<tr data-id="${p.id}">
+      <td>
+        <div class="client-name">${esc(p.client)}</div>
+        ${p.niche ? `<div class="client-niche">${esc(p.niche)}</div>` : ''}
+      </td>
+      <td><span class="value">${esc(p.value || '-')}</span></td>
+      <td>
+        <select class="status-select ${cls}" onchange="changeStatus('${p.id}', this)">
+          ${Object.entries(STATUS_LABELS).map(([v,l]) =>
+            `<option value="${v}" ${p.status === v ? 'selected' : ''}>${l}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td class="date-cell">${esc(p.date || '-')}</td>
+      <td>
+        <div class="actions">
+          ${(p.source==='vercel'||p.published) && p.slug ? `<a class="btn-act act-open" href="/${p.slug}" target="_blank">Abrir →</a>` : (p.html ? `<button class="btn-act act-open" onclick="viewProposal('${p.id}')">Abrir →</button>` : '')}
+          ${(p.source==='vercel'||p.published) && p.slug ? `<button class="btn-act act-copy" onclick="copyLink('${p.slug}',this)">Copiar link</button>` : ''}
+          <a class="btn-act act-edit" href="builder.html?id=${p.id}">${editLabel}</a>
+          ${p.html ? `<button class="btn-act act-publish" onclick="publishProposal('${p.id}')" title="Publicar no Vercel">↑ Publicar</button>` : ''}
+          ${p.html ? `<button class="btn-act act-export" onclick="exportProposal('${p.id}')">Exportar</button>` : ''}
+          <button class="btn-act act-delete" onclick="moveToTrash('${p.id}')" title="Mover para lixeira">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── STATUS CHANGE ── */
+function changeStatus(id, selectEl) {
+  const newStatus = selectEl.value;
+  const proposals = getProposals();
+  const p = proposals.find(p => p.id === id);
+  if (!p) return;
+  p.status = newStatus;
+  p.updatedAt = new Date().toISOString().slice(0, 10);
+  setProposals(proposals);
+  // Atualiza a classe visual do select sem re-renderizar a tabela toda
+  selectEl.className = `status-select ${STATUS_CLASS[newStatus] || 's-tpl'}`;
+  renderStats();
+}
+
+/* ── EXPORT ── */
+function viewProposal(id) {
+  const p = getProposals().find(p => p.id === id);
+  if (!p || !p.html) return;
+  const blob = new Blob([p.html], { type: 'text/html' });
+  window.open(URL.createObjectURL(blob), '_blank');
+}
+
+/* ── SETTINGS ── */
+function getConfig() {
+  return {
+    ghToken: localStorage.getItem('pk_gh_token') || '',
+    ghRepo:  localStorage.getItem('pk_gh_repo')  || ''
+  };
+}
+function openSettings() {
+  const c = getConfig();
+  document.getElementById('cfg-token').value = c.ghToken;
+  document.getElementById('cfg-repo').value  = c.ghRepo;
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function saveSettings() {
+  localStorage.setItem('pk_gh_token', document.getElementById('cfg-token').value.trim());
+  localStorage.setItem('pk_gh_repo',  document.getElementById('cfg-repo').value.trim());
+  closeSettings();
+}
+document.getElementById('settings-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+/* ── PUBLISH VIA GITHUB API ── */
+async function publishProposal(id) {
+  const { ghToken, ghRepo } = getConfig();
+  if (!ghToken || !ghRepo) {
+    openSettings();
+    return;
+  }
+
+  const proposals = getProposals();
+  const p = proposals.find(p => p.id === id);
+  if (!p || !p.html) { alert('Proposta sem HTML. Abra no builder e salve novamente.'); return; }
+  if (!p.slug) { alert('Defina um slug no builder antes de publicar.'); return; }
+
+  // Loading state
+  const btn = document.querySelector(`tr[data-id="${id}"] .act-publish`);
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+  const path    = `${p.slug}/index.html`;
+  const apiUrl  = `https://api.github.com/repos/${ghRepo}/contents/${path}`;
+  const headers = {
+    'Authorization': `Bearer ${ghToken}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    // Busca SHA se o arquivo já existe (necessário para atualizar)
+    let sha;
+    const check = await fetch(apiUrl, { headers });
+    if (check.ok) sha = (await check.json()).sha;
+
+    // Envia para o GitHub
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        message: `proposta: ${p.slug}`,
+        content: btoa(unescape(encodeURIComponent(p.html))),
+        ...(sha ? { sha } : {})
+      })
+    });
+
+    if (res.ok) {
+      const idx = proposals.findIndex(q => q.id === id);
+      proposals[idx].published = true;
+      setProposals(proposals);
+      renderTable();
+      // Mostra feedback com URL
+      const url = `${location.origin}/${p.slug}`;
+      const msg = document.createElement('div');
+      msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0A2A0A;color:#4CAF50;border:1px solid #1a4a1a;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;line-height:1.6;max-width:320px';
+      msg.innerHTML = `✓ Publicado no GitHub!<br><span style="font-weight:400;font-size:11px;color:#aaa">Deploy em ~30s · <a href="${url}" target="_blank" style="color:#4CAF50">${url}</a></span>`;
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 8000);
+    } else {
+      const err = await res.json();
+      alert('Erro ao publicar: ' + (err.message || 'Verifique o token e repositório em ⚙ Configurações.'));
+      if (btn) { btn.textContent = '↑ Publicar'; btn.disabled = false; }
+    }
+  } catch(e) {
+    alert('Erro de conexão: ' + e.message);
+    if (btn) { btn.textContent = '↑ Publicar'; btn.disabled = false; }
+  }
+}
+
+function copyLink(slug, btn) {
+  const url = `${location.origin}/${slug}`;
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar link'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function exportProposal(id) {
+  const p = getProposals().find(p => p.id === id);
+  if (!p || !p.html) return;
+  const blob = new Blob([p.html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `proposta-${(p.client || 'proposta').toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}.html`;
+  a.click();
+}
+
+/* ── TRASH ── */
+function getTrash() {
+  try { return JSON.parse(localStorage.getItem('pk_proposals_trash') || '[]'); } catch { return []; }
+}
+function setTrash(arr) { localStorage.setItem('pk_proposals_trash', JSON.stringify(arr)); }
+
+function moveToTrash(id) {
+  const proposals = getProposals();
+  const p = proposals.find(p => p.id === id);
+  if (!p) return;
+  p.deletedAt = new Date().toISOString();
+  setTrash([p, ...getTrash()]);
+  setProposals(proposals.filter(p => p.id !== id));
+  renderStats();
+  renderTable();
+  renderTrash();
+}
+
+function restoreFromTrash(id) {
+  const trash = getTrash();
+  const p = trash.find(p => p.id === id);
+  if (!p) return;
+  delete p.deletedAt;
+  setProposals([p, ...getProposals()]);
+  setTrash(trash.filter(t => t.id !== id));
+  renderStats();
+  renderTable();
+  renderTrash();
+}
+
+function renderTrash() {
+  const trash = getTrash();
+  const section = document.getElementById('trash-section');
+  const countEl = document.getElementById('trash-count');
+  const tbody   = document.getElementById('trash-body');
+
+  if (!trash.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  countEl.textContent = trash.length;
+
+  tbody.innerHTML = trash.map(p => {
+    const when = p.deletedAt
+      ? new Date(p.deletedAt).toLocaleDateString('pt-BR', { day:'2-digit', month:'short' })
+      : '-';
+    return `<tr>
+      <td>
+        <div class="trash-client">${esc(p.client)}</div>
+        ${p.niche ? `<div class="trash-niche">${esc(p.niche)}</div>` : ''}
+      </td>
+      <td style="color:var(--muted);font-size:12px">${esc(p.value || '-')}</td>
+      <td class="trash-date">Excluído ${when}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-restore"  onclick="restoreFromTrash('${p.id}')">↩ Restaurar</button>
+          <button class="btn-perm-del" onclick="confirmPermDelete('${p.id}','${esc(p.client).replace(/'/g,"\\'")}')">Excluir</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleTrash() {
+  const wrap    = document.getElementById('trash-body-wrap');
+  const chevron = document.getElementById('trash-chevron');
+  const open    = wrap.classList.toggle('open');
+  chevron.classList.toggle('open', open);
+}
+
+/* ── PERMANENT DELETE (só da lixeira) ── */
+let deleteTarget = null;
+
+function confirmPermDelete(id, clientName) {
+  deleteTarget = id;
+  document.getElementById('cm-body').innerHTML =
+    `Excluir permanentemente a proposta de <strong style="color:var(--cream)">${clientName}</strong>?<br>Essa ação <strong>não pode ser desfeita</strong>.`;
+  document.getElementById('cm-confirm').onclick = doPermDelete;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  deleteTarget = null;
+}
+
+function doPermDelete() {
+  if (!deleteTarget) return;
+  setTrash(getTrash().filter(p => p.id !== deleteTarget));
+  closeConfirm();
+  renderTrash();
+}
+
+document.getElementById('confirm-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+
+/* ── HELPERS ── */
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── IMPORT FROM VERCEL DASHBOARD ── */
+
+const VERCEL_PROPOSALS = [
+  { client: 'Adrianna Mancilha',  niche: 'Psicologia · Técnica SET',  value: 'R$ 599', status: 'neg', date: 'Mai 2026', slug: 'adrianna-mancilha'  },
+  { client: 'Lins Vieira',        niche: 'Advocacia Trabalhista',      value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'lins-vieira'         },
+  { client: 'EO SPORTS',          niche: 'Portal de Noticias',         value: 'R$ 997', status: 'env', date: 'Mai 2026', slug: 'eosports'            },
+  { client: 'Erica Stefano',      niche: 'Estetica · Tatuape SP',      value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'erica-stefano'       },
+  { client: 'Angelica Oliveira',  niche: 'Estetica · Tatuape SP',      value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'angelica-oliveira'   },
+  { client: 'Estetica Integrada', niche: 'Clinica de Estetica',        value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'estetica-integrada'  },
+  { client: 'Marcia Lira',        niche: 'Escola de Estetica · SP',    value: 'R$ 999', status: 'neg', date: 'Mai 2026', slug: 'marcia-lira'         },
+  { client: 'Rancho do Deminas',  niche: 'Rancho · Eventos',           value: 'R$ 599', status: 'neg', date: 'Mai 2026', slug: 'rancho-deminas'      },
+  { client: 'Site Completo',      niche: 'Template Generico',          value: 'R$ 699', status: 'tpl', date: 'Template', slug: 'site-completo'       },
+  { client: 'Advogado (Template)',niche: 'Advocacia, Generico',        value: 'R$ 599', status: 'tpl', date: 'Template', slug: 'adv'                 },
+];
+
+function importFromVercel() {
+  const existing   = getProposals();
+  const usedSlugs  = new Set(existing.map(p => p.slug).filter(Boolean));
+  const usedNames  = new Set(existing.map(p => (p.client || '').toLowerCase()));
+
+  const toAdd = VERCEL_PROPOSALS.filter(p =>
+    !usedSlugs.has(p.slug) && !usedNames.has(p.client.toLowerCase())
+  );
+
+  if (!toAdd.length) {
+    alert('Todas as propostas do painel Vercel ja estao importadas.');
+    return;
+  }
+
+  const now = new Date().toISOString().slice(0, 10);
+  const imported = toAdd.map(p => ({
+    id:        Math.random().toString(36).slice(2, 8),
+    client:    p.client,
+    niche:     p.niche,
+    value:     p.value,
+    status:    p.status,
+    date:      p.date,
+    slug:      p.slug,
+    createdAt: '2026-05-01',
+    updatedAt: now,
+    blocks:    [],
+    html:      null,
+    source:    'vercel'
+  }));
+
+  // Mantém novas propostas locais no topo, importadas abaixo
+  setProposals([...existing, ...imported]);
+  renderStats();
+  renderTable();
+}
+
+/* ── THEME ── */
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('pk_theme', isLight ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = isLight ? '🌙' : '☀️';
+}
+
+(function initTheme() {
+  if (localStorage.getItem('pk_theme') === 'light') {
+    document.documentElement.classList.add('light');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = '🌙';
+    });
+  }
+})();
+
+/* ── INIT ── */
+(function syncThemeIcon() {
+  const btn = document.getElementById('theme-btn');
+  if (btn && document.documentElement.classList.contains('light')) btn.textContent = '🌙';
+})();
+
+if (checkAuth()) showDash();
+</script>
+</body>
+</html>

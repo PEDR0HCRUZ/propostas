@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposta · Rancho do Deminas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --black: #111;
+  --gray:  #888;
+  --light: #F5F4F1;
+  --border: #E5E3DE;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #fff;
+  color: var(--black);
+  line-height: 1.6;
+}
+
+.site-header { padding: 56px 28px 48px; max-width: 720px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.header-title { font-size: clamp(28px, 5vw, 42px); font-weight: 800; line-height: 1.15; letter-spacing: -.5px; margin-bottom: 20px; }
+.header-title em { font-style: normal; font-weight: 400; color: var(--gray); display: block; font-size: .65em; letter-spacing: 0; margin-bottom: 6px; }
+.header-title strong { font-weight: 800; display: block; }
+.header-meta { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 28px; }
+.header-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.header-meta-item label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); }
+.header-meta-item span { font-size: 13px; font-weight: 600; }
+
+.section { padding: 64px 28px; max-width: 720px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+.section-num { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gray); margin-bottom: 16px; }
+.section-heading { font-size: clamp(20px, 4vw, 28px); font-weight: 800; line-height: 1.25; letter-spacing: -.3px; margin-bottom: 20px; }
+.section-body { font-size: 14px; color: #555; line-height: 1.8; max-width: 560px; margin-bottom: 28px; }
+
+/* ALERTAS */
+.alert-list { display: flex; flex-direction: column; gap: 10px; }
+.alert-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 8px; background: var(--light); border: 1px solid var(--border); }
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-text { font-size: 13px; color: var(--black); line-height: 1.5; }
+.alert-text strong { font-weight: 700; display: block; margin-bottom: 2px; }
+.alert-text span { color: var(--gray); font-size: 12px; }
+
+/* STAT DESTAQUE */
+.stat-highlight { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 32px; }
+.stat-hl { display: flex; flex-direction: column; gap: 4px; }
+.stat-hl .val { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -1.5px; color: var(--black); }
+.stat-hl .lbl { font-size: 11px; color: var(--gray); }
+
+/* SECOES DA PAGINA */
+.page-sections { display: flex; flex-direction: column; gap: 0; margin-top: 28px; }
+.page-section-row { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+.page-section-row:last-child { border-bottom: none; }
+.section-badge { padding: 8px 14px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; min-width: 130px; text-align: center; background: var(--light); color: #111; border: 1px solid var(--border); }
+.section-arrow { color: #ccc; font-size: 14px; flex-shrink: 0; margin-top: 10px; }
+.section-desc { font-size: 13px; color: #555; line-height: 1.6; padding-top: 6px; }
+
+/* TECH STACK */
+.stack-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; margin-bottom: 24px; }
+.stack-chip { background: var(--light); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; display: flex; flex-direction: column; gap: 2px; }
+.stack-chip .s-name { font-size: 13px; font-weight: 700; }
+.stack-chip .s-desc { font-size: 11px; color: var(--gray); }
+
+/* CHECKLIST */
+.checklist { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+.check-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+@media (max-width: 540px) { .check-two { grid-template-columns: 1fr; } }
+.check-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.check-item:last-child { border-bottom: none; }
+.check-circle {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #111; flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+}
+.check-circle::after {
+  content: '✓'; font-size: 11px; font-weight: 700; color: white; line-height: 1;
+}
+.check-text { font-size: 13.5px; color: var(--black); line-height: 1.5; }
+.check-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+/* PORTFÓLIO */
+.portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px; }
+@media (max-width: 540px) { .portfolio-grid { grid-template-columns: 1fr; } }
+.portfolio-card { border: 1px solid var(--border); border-radius: 10px; padding: 22px; text-decoration: none; color: inherit; display: block; transition: border-color .15s; }
+.portfolio-card:hover { border-color: #aaa; }
+.portfolio-card-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 10px; }
+.portfolio-card-name { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+.portfolio-card-desc { font-size: 12px; color: var(--gray); line-height: 1.5; margin-bottom: 14px; }
+.portfolio-card-url { font-size: 11px; color: #aaa; }
+
+/* PRICING */
+.option-card { border-radius: 10px; padding: 28px 24px; border: 1px solid var(--border); }
+.option-card.featured { background: var(--black); border-color: var(--black); }
+.option-card-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 12px; }
+.option-card.featured .option-card-tag { color: #555; }
+.option-price { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -1px; margin-bottom: 6px; }
+.option-card.featured .option-price { color: #fff; }
+.option-meta { font-size: 11px; color: var(--gray); margin-bottom: 20px; }
+.option-card.featured .option-meta { color: #555; }
+.option-divider { border: none; border-top: 1px solid var(--border); margin-bottom: 16px; }
+.option-card.featured .option-divider { border-color: #1e1e1e; }
+.option-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 20px; }
+.option-list li { font-size: 12.5px; line-height: 1.4; display: flex; gap: 10px; align-items: flex-start; }
+.option-list li::before { display: none; }
+.option-card.featured .option-list li { color: #aaa; }
+.price-note { margin-top: 16px; font-size: 12px; color: var(--gray); line-height: 1.6; }
+
+/* PRÓXIMOS PASSOS */
+.start-chips { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.start-chip { background: var(--light); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.start-chip-num { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); }
+.start-chip-label { font-size: 13px; font-weight: 700; }
+.start-chip-sub { font-size: 11px; color: var(--gray); max-width: 150px; line-height: 1.4; margin-top: 2px; }
+
+.page-footer { padding: 28px; max-width: 720px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); font-size: 11px; color: var(--gray); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-title">
+    <em>Site institucional</em>
+    <strong>Rancho do Deminas</strong>
+  </div>
+  <div class="header-meta">
+    <div class="header-meta-item"><label>Preparado por</label><span>Pedro Kunz</span></div>
+    <div class="header-meta-item"><label>Para</label><span>Rancho do Deminas</span></div>
+    <div class="header-meta-item"><label>Segmento</label><span>Rancho · Eventos</span></div>
+    <div class="header-meta-item"><label>Data</label><span>Maio de 2026</span></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="section-num">01 · Diagnóstico</div>
+  <h2 class="section-heading">O que encontramos</h2>
+  <p class="section-body">O Rancho do Deminas tem presença no Instagram e conteúdo bonito. O problema é que quem pesquisa no Google por "rancho para eventos" não encontra nada. Sem site, o rancho fica invisível para quem está tomando a decisão de fechar um evento.</p>
+
+  <div class="alert-list">
+    <div class="alert-item">
+      <div class="alert-icon">🔍</div>
+      <div class="alert-text">
+        <strong>Google não encontra o rancho</strong>
+        <span>Quem pesquisa "rancho para eventos", "local para casamento" ou "chácara para festa" não chega até vocês. O Instagram não aparece nessas buscas.</span>
+      </div>
+    </div>
+    <div class="alert-item">
+      <div class="alert-icon">📋</div>
+      <div class="alert-text">
+        <strong>Sem espaço para apresentar a estrutura</strong>
+        <span>Capacidade, estrutura disponível, tipos de evento e diferenciais precisam de uma página própria para convencer antes da primeira ligação.</span>
+      </div>
+    </div>
+    <div class="alert-item">
+      <div class="alert-icon">📱</div>
+      <div class="alert-text">
+        <strong>Tudo depende do alcance orgânico do Instagram</strong>
+        <span>Algoritmo muda, alcance cai. Um site com domínio próprio é um canal que ninguém tira de você e que aparece no Google o tempo todo.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">02 · Estrutura do site</div>
+  <h2 class="section-heading">Estrutura do site</h2>
+  <p class="section-body">Página única, objetiva e rápida. Cada seção com um propósito claro: apresentar, convencer e converter visita em contato.</p>
+
+  <div class="page-sections">
+    <div class="page-section-row">
+      <div class="section-badge">Hero</div>
+      <div class="section-arrow">→</div>
+      <div class="section-desc">Nome, frase de impacto, foto principal do espaço e botão direto para WhatsApp ou formulário de contato.</div>
+    </div>
+    <div class="page-section-row">
+      <div class="section-badge">Sobre</div>
+      <div class="section-arrow">→</div>
+      <div class="section-desc">História do rancho, capacidade, estrutura disponível e diferenciais do espaço.</div>
+    </div>
+    <div class="page-section-row">
+      <div class="section-badge">Depoimentos</div>
+      <div class="section-arrow">→</div>
+      <div class="section-desc">Avaliações e relatos de quem já realizou eventos no espaço. Prova social para quem ainda está decidindo.</div>
+    </div>
+    <div class="page-section-row">
+      <div class="section-badge">Eventos marcantes</div>
+      <div class="section-arrow">→</div>
+      <div class="section-desc">Galeria com fotos dos principais eventos realizados. Casamentos, confraternizações, aniversários.</div>
+    </div>
+    <div class="page-section-row">
+      <div class="section-badge">Contato</div>
+      <div class="section-arrow">→</div>
+      <div class="section-desc">WhatsApp, Instagram, localização e formulário de solicitação de orçamento.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">03 · Tecnologia</div>
+  <h2 class="section-heading">Como vai ser construído</h2>
+  <p class="section-body">Diferente de WordPress, aqui não tem mensalidade de hospedagem. O site é gerado em código estático e publicado de graça no Vercel. Você paga só o domínio.</p>
+
+  <div class="stack-chips">
+    <div class="stack-chip">
+      <div class="s-name">Astro</div>
+      <div class="s-desc">Framework moderno, site ultra-rápido</div>
+    </div>
+    <div class="stack-chip">
+      <div class="s-name">Vercel</div>
+      <div class="s-desc">Hospedagem gratuita e global</div>
+    </div>
+    <div class="stack-chip">
+      <div class="s-name">Domínio</div>
+      <div class="s-desc">Incluso no primeiro ano</div>
+    </div>
+  </div>
+
+  <div class="alert-list">
+    <div class="alert-item">
+      <div class="alert-icon">⚡</div>
+      <div class="alert-text">
+        <strong>Performance máxima sem custo extra</strong>
+        <span>Sites em Astro carregam em menos de 1 segundo. Não tem servidor para pagar, não tem plugin para atualizar, não tem mensalidade.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">04 · O que está incluso</div>
+  <h2 class="section-heading">O que está incluso</h2>
+  <div class="checklist check-two">
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Design exclusivo para o rancho</div><div class="check-sub">Visual que transmite o estilo do espaço</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">SEO configurado</div><div class="check-sub">Meta descriptions, títulos e indexação no Google</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Domínio incluso no primeiro ano</div><div class="check-sub">Registro do domínio ranchodeminas.com.br ou similar</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Formulário de orçamento</div><div class="check-sub">Solicitações direto na sua caixa de entrada</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Galeria de fotos otimizada</div><div class="check-sub">Imagens leves e de carregamento rápido</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Botão de WhatsApp fixo</div><div class="check-sub">Em todas as seções da página</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Responsivo para celular e tablet</div><div class="check-sub">Perfeito em qualquer tela</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Google Analytics instalado</div><div class="check-sub">Dados reais de quem visita o site</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">Open Graph para redes sociais</div><div class="check-sub">Links com imagem e título ao compartilhar</div></div></div>
+    <div class="check-item"><div class="check-circle"></div><div><div class="check-text">30 dias de suporte técnico</div><div class="check-sub">Ajustes e dúvidas no período pós-entrega</div></div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">05 · Portfólio</div>
+  <h2 class="section-heading">Trabalhos anteriores</h2>
+  <p class="section-body">Projetos desenvolvidos com o mesmo cuidado visual e foco em resultado.</p>
+  <div class="portfolio-grid">
+    <a class="portfolio-card" href="https://www.dratharita.com.br/" target="_blank">
+      <div class="portfolio-card-tag">Harmonização Orofacial · Florianópolis</div>
+      <div class="portfolio-card-name">Dra. Tharita</div>
+      <div class="portfolio-card-desc">Site para especialista em harmonização orofacial. Design sofisticado, galeria de resultados e foco em conversão via WhatsApp.</div>
+      <div class="portfolio-card-url">dratharita.com.br ↗</div>
+    </a>
+    <a class="portfolio-card" href="https://clinicabarrosradiologia.com.br/" target="_blank">
+      <div class="portfolio-card-tag">Radiologia · Paraná</div>
+      <div class="portfolio-card-name">Clínica Barros Radiologia</div>
+      <div class="portfolio-card-desc">Site institucional com estrutura clara, identidade visual profissional e otimizado para buscas no Google.</div>
+      <div class="portfolio-card-url">clinicabarrosradiologia.com.br ↗</div>
+    </a>
+    <a class="portfolio-card" href="https://danifigueiredo.com.br/intimamente-lp/" target="_blank">
+      <div class="portfolio-card-tag">Landing Page · Moda Íntima</div>
+      <div class="portfolio-card-name">Intimamente · Dani Figueiredo</div>
+      <div class="portfolio-card-desc">Landing page de alta conversão para lançamento de produto. Design focado em apresentar a oferta e conduzir ao clique.</div>
+      <div class="portfolio-card-url">danifigueiredo.com.br ↗</div>
+    </a>
+    <a class="portfolio-card" href="https://zenaviagens.com/" target="_blank">
+      <div class="portfolio-card-tag">Agência de Viagens · Brasil</div>
+      <div class="portfolio-card-name">Zen Viagens</div>
+      <div class="portfolio-card-desc">Site para agência de viagens com apresentação de destinos, pacotes e canal direto para contato e reservas.</div>
+      <div class="portfolio-card-url">zenaviagens.com ↗</div>
+    </a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-num">06 · Prazo e investimento</div>
+  <h2 class="section-heading">Prazo e investimento</h2>
+  <div class="option-card featured" style="margin-top:32px;">
+    <div class="option-card-tag">Site completo · Página única</div>
+    <div class="option-price">R$ 599</div>
+    <div class="option-meta">À vista · Astro + Vercel</div>
+    <hr class="option-divider">
+    <ul class="option-list">
+      <li>Concepção e aprovação do design</li>
+      <li>Desenvolvimento e aprovação final</li>
+      <li>Domínio incluso no primeiro ano</li>
+      <li>Hospedagem gratuita no Vercel</li>
+      <li>SEO e performance configurados</li>
+      <li>30 dias de suporte técnico</li>
+      <li>Entrega em até 10 dias úteis</li>
+    </ul>
+  </div>
+  <p class="price-note">Parcelamento em até 12x no cartão com juros da maquininha. Sem mensalidade de hospedagem.</p>
+</section>
+
+<section class="section">
+  <div class="section-num">07 · Para começar</div>
+  <h2 class="section-heading">Próximos passos</h2>
+  <div class="start-chips">
+    <div class="start-chip"><div class="start-chip-num">Passo 1</div><div class="start-chip-label">Aprovação do orçamento</div><div class="start-chip-sub">Confirmação e pagamento de entrada</div></div>
+    <div class="start-chip"><div class="start-chip-num">Passo 2</div><div class="start-chip-label">Envio dos materiais</div><div class="start-chip-sub">Fotos, logo e textos do rancho</div></div>
+    <div class="start-chip"><div class="start-chip-num">Passo 3</div><div class="start-chip-label">Início do projeto</div><div class="start-chip-sub">Design apresentado em até 3 dias úteis</div></div>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <span>Pedro Kunz</span>
+  <span>Proposta válida por 15 dias · Maio de 2026</span>
+</footer>
+
+</body>
+</html>

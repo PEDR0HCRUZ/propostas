@@ -1,0 +1,397 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposta · EO SPORTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --navy: #1A3560;
+  --navy-light: #2a4f82;
+  --gray-50: #F8FAFC;
+  --gray-100: #F1F5F9;
+  --gray-200: #E2E8F0;
+  --gray-400: #94A3B8;
+  --gray-600: #475569;
+  --gray-800: #1E293B;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--gray-100);
+  color: var(--gray-800);
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+.site-header {
+  background: var(--navy);
+  color: white;
+  padding: 32px 24px 28px;
+}
+.header-inner { max-width: 780px; margin: 0 auto; }
+.header-tag {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: #8BAFD4; margin-bottom: 10px;
+}
+.header-title { font-size: clamp(22px, 5vw, 30px); font-weight: 900; letter-spacing: -.3px; margin-bottom: 4px; }
+.header-sub { font-size: 13px; color: #8BAFD4; margin-bottom: 20px; }
+.header-meta { display: flex; flex-wrap: wrap; gap: 20px; }
+.header-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.header-meta-item label { font-size: 9px; text-transform: uppercase; letter-spacing: .8px; color: #8BAFD4; }
+.header-meta-item span { font-size: 12px; font-weight: 600; }
+
+/* ── NAV LINK ── */
+.back-link {
+  max-width: 780px; margin: 0 auto;
+  padding: 14px 24px;
+  display: block;
+}
+.back-link a {
+  font-size: 12px; color: var(--navy); font-weight: 600; text-decoration: none;
+}
+.back-link a:hover { text-decoration: underline; }
+
+/* ── CONTAINER ── */
+.container { max-width: 780px; margin: 0 auto; padding: 8px 24px 64px; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--navy);
+  margin-bottom: 14px; margin-top: 32px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--gray-200);
+}
+.section-label:first-child { margin-top: 0; }
+
+/* ── INTRO ── */
+.intro { font-size: 14px; color: var(--gray-600); line-height: 1.75; }
+
+/* ── DUAS COLUNAS ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 560px) { .two-col { grid-template-columns: 1fr; } }
+
+.inc-block {
+  background: white; border: 1px solid var(--gray-200);
+  border-radius: 10px; padding: 20px 22px;
+}
+.inc-block-title {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--navy); margin-bottom: 14px;
+}
+.inc-list { padding-left: 16px; display: flex; flex-direction: column; gap: 5px; }
+.inc-list li { font-size: 13px; color: #444; line-height: 1.5; }
+
+/* ── NÃO INCLUSO ── */
+.ninc-block {
+  background: white; border: 1px solid var(--gray-200);
+  border-radius: 10px; padding: 20px 22px;
+}
+.ninc-list { padding-left: 16px; display: flex; flex-direction: column; gap: 5px; }
+.ninc-list li { font-size: 13px; color: #999; line-height: 1.5; }
+
+/* ── CONDIÇÕES ── */
+.cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 480px) { .cond-grid { grid-template-columns: 1fr; } }
+.cond-item {
+  background: white; border: 1px solid var(--gray-200);
+  border-left: 3px solid var(--navy);
+  border-radius: 10px; padding: 20px 22px;
+}
+.cond-item-title {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--navy); margin-bottom: 8px;
+}
+.cond-item-text { font-size: 13px; color: var(--gray-600); line-height: 1.7; }
+
+/* ── BEFORE/AFTER TABLE ── */
+.ba-wrap { overflow-x: auto; margin-top: 4px; }
+.ba-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  font-size: 12.5px;
+  min-width: 500px;
+}
+.ba-table thead tr { background: var(--navy); color: white; }
+.ba-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.ba-table tbody tr:nth-child(even) { background: var(--gray-50); }
+.ba-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--gray-200);
+  color: #888;
+  vertical-align: top;
+}
+.ba-table tbody tr:last-child td { border-bottom: none; }
+.ba-table td.good { color: var(--navy); font-weight: 600; }
+.ba-table td:first-child { color: var(--gray-800); font-weight: 500; }
+
+/* ── DIVIDER ── */
+.divider { border: none; border-top: 1px solid var(--gray-200); margin: 32px 0; }
+
+/* ── SITEMAP ── */
+.sitemap-svg { width: 100%; display: block; margin-top: 4px; overflow: visible; }
+
+/* ── FOOTER ── */
+.page-footer {
+  margin-top: 48px; padding-top: 20px;
+  border-top: 1px solid var(--gray-200);
+  text-align: center; font-size: 11px; color: var(--gray-400);
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-tag">Proposta comercial</div>
+    <div class="header-title">EO SPORTS</div>
+    <div class="header-sub">WordPress + Elementor, Portal de Notícias Profissional</div>
+    <div class="header-meta">
+      <div class="header-meta-item"><label>Empresa</label><span>EO SPORTS</span></div>
+      <div class="header-meta-item"><label>Site atual</label><span>eosports.com.br</span></div>
+      <div class="header-meta-item"><label>Data</label><span>Maio de 2026</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="back-link">
+  <a href="/eosports">← Ver análise técnica</a>
+</div>
+
+<main class="container">
+
+  <div class="section-label" style="margin-top:0;">Sobre o projeto</div>
+  <p class="intro">
+    Redesign completo do portal EO SPORTS com foco em dois objetivos centrais: converter visitantes em leitores fiéis e posicionar o site como um veículo atrativo para patrocinadores. O projeto contempla identidade visual editorial, correção dos problemas técnicos identificados na análise e a criação de uma estrutura comercial capaz de gerar receita com anunciantes.
+  </p>
+
+  <div class="section-label">O que está incluso</div>
+  <div class="two-col">
+    <div class="inc-block">
+      <div class="inc-block-title">Design e estrutura</div>
+      <ul class="inc-list">
+        <li>Identidade visual editorial, layout claro</li>
+        <li>Homepage com hero, notícias e linha do tempo</li>
+        <li>Seção "Sobre o Blog" na homepage</li>
+        <li>Seção de patrocinadores com posições premium</li>
+        <li>Página "Seja Patrocinador" (media kit)</li>
+        <li>Blog com categorias e busca</li>
+        <li>Linha do tempo interativa</li>
+        <li>Página de parceiros</li>
+        <li>Sobre, Contato e Política Editorial</li>
+        <li>Responsivo (mobile + tablet + desktop)</li>
+      </ul>
+    </div>
+    <div class="inc-block">
+      <div class="inc-block-title">Técnico e SEO</div>
+      <ul class="inc-list">
+        <li>Otimização de imagens em formato WebP</li>
+        <li>Lazy load e dimensões definidas nas imagens</li>
+        <li>Remoção de JavaScript não utilizado</li>
+        <li>Meta description em todas as páginas</li>
+        <li>Open Graph para redes sociais</li>
+        <li>Sitemap.xml e robots.txt configurados</li>
+        <li>Email profissional @eosports.com.br</li>
+        <li>Painel ADM removido do menu público</li>
+        <li>Integração com WhatsApp</li>
+        <li>Google Analytics configurado</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-label">Não está incluso</div>
+  <div class="ninc-block">
+    <ul class="ninc-list">
+      <li>Produção de conteúdo editorial (textos e fotos das notícias)</li>
+      <li>Integração com plataformas de anúncio programático (Google AdSense, etc.)</li>
+      <li>Aplicativo mobile</li>
+      <li>Hospedagem e renovação anual de domínio (contratados separadamente)</li>
+    </ul>
+  </div>
+
+  <div class="section-label">Condições</div>
+  <div class="cond-grid">
+    <div class="cond-item">
+      <div class="cond-item-title">Prazo estimado</div>
+      <div class="cond-item-text">15 dias úteis após o envio de todos os materiais necessários.</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-item-title">Materiais necessários</div>
+      <div class="cond-item-text">Logotipo em alta resolução · Acesso ao domínio · Textos institucionais</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-label">Antes e Depois</div>
+  <div class="ba-wrap">
+    <table class="ba-table">
+      <thead>
+        <tr><th>Aspecto</th><th>Antes (atual)</th><th>Depois (proposta)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Visual e identidade</td>
+          <td>Template escuro gerado por IA, estética de games, sem identidade editorial</td>
+          <td class="good">Layout editorial claro, profissional e alinhado ao jornalismo esportivo</td>
+        </tr>
+        <tr>
+          <td>Velocidade mobile (FCP)</td>
+          <td>4,0 segundos, acima do dobro do limite ideal</td>
+          <td class="good">Meta abaixo de 1,8s via WebP, lazy load e remoção de JS não utilizado</td>
+        </tr>
+        <tr>
+          <td>Velocidade mobile (LCP)</td>
+          <td>6,1 segundos, 53% dos usuários abandonam antes de carregar</td>
+          <td class="good">Meta abaixo de 2,5s com imagens otimizadas e dimensões definidas</td>
+        </tr>
+        <tr>
+          <td>Email de contato</td>
+          <td>eosports@hotmail.com, compromete credibilidade com parceiros</td>
+          <td class="good">contato@eosports.com.br, email profissional no próprio domínio</td>
+        </tr>
+        <tr>
+          <td>Seção de patrocinadores</td>
+          <td>"Nenhum patrocinador ativo no momento", visível publicamente</td>
+          <td class="good">Página "Seja Patrocinador" com media kit, alcance e formatos de anúncio</td>
+        </tr>
+        <tr>
+          <td>Sobre o portal</td>
+          <td>Ausente, visitante novo não entende o propósito do site</td>
+          <td class="good">Seção "Sobre o Blog" na homepage apresentando o portal e nicho editorial</td>
+        </tr>
+        <tr>
+          <td>SEO e redes sociais</td>
+          <td>Sem meta description, sem Open Graph, sem sitemap no Google</td>
+          <td class="good">Meta description, Open Graph, sitemap.xml e robots.txt configurados</td>
+        </tr>
+        <tr>
+          <td>Painel ADM</td>
+          <td>Visível no menu público, expõe estrutura interna a qualquer visitante</td>
+          <td class="good">Removido do menu e acessível apenas por URL direta</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-label">Estrutura proposta do novo site</div>
+  <svg class="sitemap-svg" viewBox="0 0 720 590" xmlns="http://www.w3.org/2000/svg">
+
+    <rect x="0" y="20" width="130" height="38" rx="4" fill="#1A3560"/>
+    <text x="65" y="39" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="white" font-size="11" font-weight="700">HOME</text>
+    <line x1="18" y1="58" x2="18" y2="76" stroke="#C8C8C8" stroke-width="1"/>
+    <line x1="18" y1="76" x2="40" y2="76" stroke="#C8C8C8" stroke-width="1"/>
+    <polygon points="36,72 44,76 36,80" fill="#C8C8C8"/>
+    <rect x="50" y="62" width="90" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="95" y="75" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Destaque + Notícias</text>
+    <line x1="154" y1="76" x2="170" y2="76" stroke="#C8C8C8" stroke-width="1"/>
+    <rect x="170" y="62" width="82" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="211" y="75" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Linha do Tempo</text>
+    <line x1="266" y1="76" x2="282" y2="76" stroke="#C8C8C8" stroke-width="1"/>
+    <rect x="282" y="62" width="82" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="323" y="75" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Banners Sponsors</text>
+    <line x1="378" y1="76" x2="394" y2="76" stroke="#C8C8C8" stroke-width="1"/>
+    <rect x="394" y="62" width="86" height="26" rx="3" fill="white" stroke="#1A3560" stroke-width="1"/>
+    <text x="437" y="75" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#1A3560" font-size="8" font-weight="700">Sobre o Blog *</text>
+    <line x1="0" y1="100" x2="720" y2="100" stroke="#F0F0F0" stroke-width="1"/>
+
+    <rect x="0" y="110" width="130" height="38" rx="4" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="1"/>
+    <text x="65" y="129" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#1A1A1A" font-size="11" font-weight="700">NOTÍCIAS</text>
+    <line x1="18" y1="148" x2="18" y2="166" stroke="#C8C8C8" stroke-width="1"/>
+    <line x1="18" y1="166" x2="40" y2="166" stroke="#C8C8C8" stroke-width="1"/>
+    <polygon points="36,162 44,166 36,170" fill="#C8C8C8"/>
+    <rect x="50" y="152" width="80" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="90" y="165" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Futebol Nacional</text>
+    <line x1="144" y1="166" x2="160" y2="166" stroke="#C8C8C8" stroke-width="1"/>
+    <rect x="160" y="152" width="80" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="200" y="165" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Futebol Regional</text>
+    <line x1="254" y1="166" x2="270" y2="166" stroke="#C8C8C8" stroke-width="1"/>
+    <rect x="270" y="152" width="80" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="310" y="165" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Mercado da Bola</text>
+    <line x1="0" y1="192" x2="720" y2="192" stroke="#F0F0F0" stroke-width="1"/>
+
+    <rect x="0" y="202" width="130" height="38" rx="4" fill="#1A3560"/>
+    <text x="65" y="221" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="white" font-size="10" font-weight="700">PATROCINADORES</text>
+    <line x1="18" y1="240" x2="18" y2="258" stroke="#C8C8C8" stroke-width="1"/>
+    <line x1="18" y1="258" x2="40" y2="258" stroke="#C8C8C8" stroke-width="1"/>
+    <polygon points="36,254 44,258 36,262" fill="#C8C8C8"/>
+    <rect x="50" y="244" width="98" height="26" rx="3" fill="white" stroke="#1A3560" stroke-width="1"/>
+    <text x="99" y="257" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#1A3560" font-size="8" font-weight="700">Seja Patrocinador *</text>
+    <line x1="162" y1="258" x2="178" y2="258" stroke="#C8C8C8" stroke-width="1"/>
+    <rect x="178" y="244" width="90" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="223" y="257" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Patrocinadores Ativos</text>
+    <line x1="0" y1="284" x2="720" y2="284" stroke="#F0F0F0" stroke-width="1"/>
+
+    <rect x="0" y="294" width="130" height="38" rx="4" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="1"/>
+    <text x="65" y="313" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#1A1A1A" font-size="11" font-weight="700">PARCEIROS</text>
+    <line x1="18" y1="332" x2="18" y2="350" stroke="#C8C8C8" stroke-width="1"/>
+    <line x1="18" y1="350" x2="40" y2="350" stroke="#C8C8C8" stroke-width="1"/>
+    <polygon points="36,346 44,350 36,354" fill="#C8C8C8"/>
+    <rect x="50" y="336" width="86" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="93" y="349" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Grid de Parceiros</text>
+    <line x1="0" y1="376" x2="720" y2="376" stroke="#F0F0F0" stroke-width="1"/>
+
+    <rect x="0" y="386" width="130" height="38" rx="4" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="1"/>
+    <text x="65" y="405" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#1A1A1A" font-size="11" font-weight="700">SOBRE</text>
+    <line x1="18" y1="424" x2="18" y2="442" stroke="#C8C8C8" stroke-width="1"/>
+    <line x1="18" y1="442" x2="40" y2="442" stroke="#C8C8C8" stroke-width="1"/>
+    <polygon points="36,438 44,442 36,446" fill="#C8C8C8"/>
+    <rect x="50" y="428" width="76" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="88" y="441" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Quem somos</text>
+    <line x1="140" y1="442" x2="156" y2="442" stroke="#C8C8C8" stroke-width="1"/>
+    <rect x="156" y="428" width="76" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="194" y="441" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Política Editorial</text>
+    <line x1="0" y1="468" x2="720" y2="468" stroke="#F0F0F0" stroke-width="1"/>
+
+    <rect x="0" y="478" width="130" height="38" rx="4" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="1"/>
+    <text x="65" y="497" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#1A1A1A" font-size="11" font-weight="700">CONTATO</text>
+    <line x1="18" y1="516" x2="18" y2="534" stroke="#C8C8C8" stroke-width="1"/>
+    <line x1="18" y1="534" x2="40" y2="534" stroke="#C8C8C8" stroke-width="1"/>
+    <polygon points="36,530 44,534 36,538" fill="#C8C8C8"/>
+    <rect x="50" y="520" width="102" height="26" rx="3" fill="white" stroke="#E2E2E2" stroke-width="1"/>
+    <text x="101" y="533" text-anchor="middle" dominant-baseline="middle" font-family="Inter,Arial,sans-serif" fill="#555" font-size="8">Formulário + WhatsApp</text>
+
+    <text x="0" y="568" font-family="Inter,Arial,sans-serif" fill="#AAA" font-size="9">* "Sobre o Blog", seção na home apresentando o portal e nicho editorial para visitantes frios.</text>
+    <text x="0" y="582" font-family="Inter,Arial,sans-serif" fill="#AAA" font-size="9">* "Seja Patrocinador", página com media kit: alcance, formatos de anúncio e condições.</text>
+  </svg>
+
+  <hr class="divider">
+
+  <div class="section-label">Investimento</div>
+  <div class="cond-grid">
+    <div class="cond-item">
+      <div class="cond-item-title">À vista</div>
+      <div class="cond-item-text" style="font-size:22px;font-weight:800;color:var(--navy);">R$ 997,00</div>
+    </div>
+    <div class="cond-item">
+      <div class="cond-item-title">Parcelado</div>
+      <div class="cond-item-text">Em até <strong>12×</strong> no cartão, juros da maquininha.</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    Proposta válida por 15 dias · Maio de 2026 · eosports.com.br
+  </div>
+
+</main>
+</body>
+</html>
+
+
