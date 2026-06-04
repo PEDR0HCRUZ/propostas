@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Carregando proposta Lucas Lopes...</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0D0D0D; color: #CCC;
+         display: flex; align-items: center; justify-content: center;
+         height: 100vh; margin: 0; flex-direction: column; gap: 12px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid #333;
+             border-top-color: #C4A265; border-radius: 50%;
+             animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  p { font-size: 13px; color: #666; }
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+<p>Carregando proposta Lucas Lopes no builder...</p>
+<script>
+(function() {
+
+const uid = () => Math.random().toString(36).slice(2, 8);
+
+const BLOCKS = [
+  {
+    id: uid(), type: 'header',
+    data: {
+      supertitle: 'Proposta de criação de site',
+      title: 'Lucas Lopes',
+      meta: [
+        { label: 'Preparado por', value: 'Pedro Kunz' },
+        { label: 'Para',          value: 'Lucas Lopes' },
+        { label: 'Segmento',      value: 'Extração de Mármore · CE' },
+        { label: 'Data',          value: 'Junho de 2026' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'textlivre',
+    data: {
+      heading: 'Ideia principal do site',
+      body: '<p>A ideia é desenvolver uma landing page para divulgação institucional e dos serviços e produtos oferecidos.</p><p>O produto são blocos de mármore bruto.</p><p>O mármore bruto em bloco tem quatro perfis principais de comprador. O site precisa falar com todos eles ao mesmo tempo:</p><p><strong>1. Marmorarias e beneficiadoras</strong><br>Compram blocos para serrar, polir e revender em chapas ou peças acabadas. Buscam volume constante, qualidade uniforme e preço competitivo. Precisam ver especificações técnicas: dimensões, peso médio, tipo de pedra, procedência.</p><p><strong>2. Construtoras e empreiteiras</strong><br>Usam mármore em acabamentos de alto padrão (pisos, revestimentos, bancadas). Compram em projeto, buscam fornecedor que entregue dentro do prazo e tenha nota fiscal. Valorizam foto real do produto e formulário de orçamento.</p><p><strong>3. Exportadores e brokers</strong><br>Intermediários que compram de extratoras brasileiras e revendem para Europa, EUA e Ásia. Procuram volume, regularidade de entrega e documentação. Geralmente chegam por busca online com termos técnicos em inglês.</p><p><strong>4. Arquitetos e designers de interiores</strong><br>Especificam mármore em projetos de clientes de alta renda. Não compram diretamente mas indicam o fornecedor. O site precisa ter galeria com fotos do produto e contato fácil para pedir amostras.</p>'
+    }
+  },
+  {
+    id: uid(), type: 'lpsections',
+    data: {
+      heading: 'Estrutura do site',
+      body: 'Uma página clara, rápida de carregar e focada em converter visitante em contato direto via WhatsApp ou formulário.',
+      rows: [
+        { badge: 'Hero',         desc: 'Nome da empresa, foto de destaque dos blocos e CTA direto para WhatsApp.' },
+        { badge: 'Sobre',        desc: 'Quem é o Lucas, onde fica a extração, quantos anos de mercado, diferenciais.' },
+        { badge: 'Produtos',     desc: 'Fotos dos blocos com especificações: tipo de mármore, dimensões disponíveis, acabamento.' },
+        { badge: 'Para quem',    desc: 'Marmorarias, construtoras, exportadores e arquitetos - cada perfil com seu benefício.' },
+        { badge: 'Contato',      desc: 'Formulário de orçamento (nome, empresa, WhatsApp, produto e quantidade) + localização da extração + botão direto para WhatsApp. Após envio do formulário, mensagem automática cai no WhatsApp do Lucas.' },
+        { badge: 'Rodapé',       desc: 'WhatsApp, e-mail, redes sociais e link para formulário.' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'checklist',
+    data: {
+      heading: 'O que está incluso',
+      items: [
+        { text: 'Criação do site completo',                  sub: 'WordPress + Elementor, responsivo para celular' },
+        { text: 'Galeria de produtos com fotos',             sub: 'Upload de até 20 fotos dos blocos e produtos' },
+        { text: 'Formulário de orçamento',                   sub: 'Com notificação automática no WhatsApp após envio' },
+        { text: 'CTAs de WhatsApp em todas as seções',       sub: 'Botão fixo + botões dentro das seções' },
+        { text: 'SEO básico configurado',                    sub: 'Para aparecer em buscas de mármore no Ceará' },
+        { text: 'Hospedagem + domínio inclusos no 1º ano',   sub: 'Sem custo adicional no primeiro ano' },
+        { text: 'Performance otimizada',                     sub: 'Carregamento rápido mesmo em conexão lenta' },
+        { text: '30 dias de suporte técnico',                sub: 'Ajustes e correções após a entrega' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'precounico',
+    data: {
+      heading: 'Investimento',
+      tag: 'Site completo',
+      price: 'R$ 899',
+      meta: 'À vista · WordPress + Elementor',
+      items: [
+        'Desenvolvimento completo do site',
+        'Galeria de produtos',
+        'Formulário com notificação no WhatsApp',
+        'CTAs de WhatsApp em todas as seções',
+        'SEO básico configurado',
+        'Hospedagem + domínio inclusos no 1º ano',
+        'Performance e carregamento otimizados',
+        '30 dias de suporte técnico',
+        'Entrega em até 14 dias úteis'
+      ],
+      note: 'Parcelamento em até 12x no cartão com juros da maquininha.'
+    }
+  },
+  {
+    id: uid(), type: 'portfolio',
+    data: {
+      sectionLabel: 'Portfólio',
+      heading: 'Trabalhos anteriores',
+      body: 'Projetos desenvolvidos com o mesmo cuidado visual e foco em resultado.',
+      cards: [
+        { tag: 'Harmonização Orofacial · Florianópolis', name: 'Dra. Tharita', desc: 'Site para especialista em harmonização orofacial. Design sofisticado, galeria de resultados e foco em conversão via WhatsApp.', url: 'https://www.dratharita.com.br/' },
+        { tag: 'Radiologia · Paraná', name: 'Clínica Barros Radiologia', desc: 'Site institucional com estrutura clara, identidade visual profissional e otimizado para buscas no Google.', url: 'https://clinicabarrosradiologia.com.br/' },
+        { tag: 'Landing Page · Moda Íntima', name: 'Intimamente · Dani Figueiredo', desc: 'Landing page de alta conversão para venda de produto. Design visual forte e condução estratégica até o clique.', url: 'https://danifigueiredo.com.br/intimamente-lp/' },
+        { tag: 'Agência de Viagens · Brasil', name: 'Zen Viagens', desc: 'Site para agência de viagens com apresentação de destinos, pacotes e canal direto para contato.', url: 'https://zenaviagens.com/' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'passos',
+    data: {
+      heading: 'Próximos passos',
+      steps: [
+        { num: 'Passo 1', label: 'Aprovação do orçamento',  sub: 'Confirmação e pagamento de entrada' },
+        { num: 'Passo 2', label: 'Envio dos materiais',     sub: 'Fotos dos produtos, logo e textos sobre a empresa' },
+        { num: 'Passo 3', label: 'Início do projeto',       sub: 'Design apresentado em até 3 dias úteis' }
+      ]
+    }
+  }
+];
+
+const proposalId = uid();
+
+const proposal = {
+  id:        proposalId,
+  client:    'Lucas Lopes',
+  niche:     'Extração de Mármore',
+  value:     'R$ 899',
+  status:    'env',
+  date:      'Mai 2026',
+  slug:      'lucas-lopes',
+  createdAt: '2026-05-01',
+  updatedAt: '2026-05-01',
+  blocks:    BLOCKS,
+  html:      null,
+  published: false
+};
+
+try {
+  const existing = JSON.parse(localStorage.getItem('pk_proposals') || '[]');
+  const filtered = existing.filter(p => p.slug !== 'lucas-lopes');
+  filtered.unshift(proposal);
+  localStorage.setItem('pk_proposals', JSON.stringify(filtered));
+  localStorage.setItem('pk_builder_v2', JSON.stringify(BLOCKS));
+} catch(e) {}
+
+window.location.href = 'builder.html?id=' + proposalId;
+
+})();
+</script>
+</body>
+</html>

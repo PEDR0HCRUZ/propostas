@@ -125,6 +125,8 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .arr-title { font-size: 10px; font-weight: 700; color: #444; flex: 1; }
 .arr-rm { font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid #2a2a2a; background: none; color: var(--muted); cursor: pointer; font-family: inherit; }
 .arr-rm:hover { color: #e55; border-color: #e55; }
+.arr-mv { font-size: 10px; padding: 2px 5px; border-radius: 4px; border: 1px solid #2a2a2a; background: none; color: var(--muted); cursor: pointer; font-family: inherit; }
+.arr-mv:hover { color: var(--cream); border-color: var(--drag-color); }
 .btn-add { font-size: 11px; padding: 7px; border-radius: 6px; border: 1px dashed #2a2a2a; background: none; color: var(--muted); cursor: pointer; font-family: inherit; transition: .15s; text-align: center; }
 .btn-add:hover { color: var(--gold); border-color: var(--gold); }
 .row2 { display: flex; gap: 6px; }
@@ -133,6 +135,8 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 /* SAVE MODAL */
 #save-modal { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.75); align-items: center; justify-content: center; padding: 24px; }
 #save-modal.open { display: flex; }
+.sm-preview { background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 11px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+.sm-preview span { color: var(--cream); font-weight: 600; }
 .sm-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px 24px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; }
 .sm-title { font-size: 14px; font-weight: 700; color: var(--cream); }
 .sm-subtitle { font-size: 11px; color: var(--muted); margin-top: -6px; line-height: 1.5; }
@@ -148,10 +152,10 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
   <div class="topbar-sep"></div>
   <span class="topbar-saved" id="save-status"></span>
   <button class="tbtn" id="theme-btn" onclick="toggleTheme()" title="Alternar tema">☀️</button>
+  <span id="pub-status" style="font-size:11px;font-weight:600;transition:.3s"></span>
   <a class="tbtn" href="index.html" style="text-decoration:none">← Propostas</a>
   <button class="tbtn" onclick="newCanvas()">Novo</button>
-  <button class="tbtn" onclick="showPreview()">Visualizar</button>
-  <button class="tbtn primary" onclick="openSaveModal()">Salvar proposta →</button>
+  <button class="tbtn primary" id="save-btn" onclick="handleSave()">Salvar →</button>
 </div>
 
 <div class="layout">
@@ -168,23 +172,15 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 
 <div id="save-modal">
   <div class="sm-box">
-    <div class="sm-title" id="sm-title-text">Salvar proposta</div>
-    <div class="sm-subtitle">Os dados abaixo aparecem no painel. Os campos de cliente e valor são preenchidos automaticamente se houver um bloco Cabeçalho e Preço.</div>
-    <div class="fg"><div class="fl">Cliente *</div><input class="fi" id="sm-client" placeholder="Nome do cliente"></div>
-    <div class="fg"><div class="fl">Segmento / Nicho</div><input class="fi" id="sm-niche" placeholder="Ex: Psicologia · Florianópolis"></div>
-    <div class="fg"><div class="fl">Valor</div><input class="fi" id="sm-value" placeholder="R$ 599"></div>
-    <div class="fg"><div class="fl">Status</div>
-      <select class="fi" id="sm-status">
-        <option value="neg">Negociação</option>
-        <option value="env">Enviada</option>
-        <option value="ok">Fechada</option>
-        <option value="tpl">Template</option>
-      </select>
+    <div class="sm-title">Definir URL da proposta</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Só precisa fazer isso uma vez. Depois é só editar e salvar.</div>
+    <div class="fg">
+      <div class="fl">Slug (URL)</div>
+      <input class="fi" id="sm-slug" placeholder="nome-do-cliente" oninput="this.value=slugify(this.value);document.getElementById('slug-preview').textContent=this.value">
     </div>
-    <div class="fg"><div class="fl">Data</div><input class="fi" id="sm-date" placeholder="Mai 2026"></div>
-    <div class="fg"><div class="fl">Slug (URL da proposta)</div><input class="fi" id="sm-slug" placeholder="estetica-integrada" oninput="this.value=slugify(this.value)"></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">propostas-pedrokunz.vercel.app/ver?s=<strong id="slug-preview" style="color:var(--gold)"></strong></div>
     <div class="sm-actions">
-      <button class="tbtn primary" onclick="saveProposal()" style="flex:1" id="sm-save-btn">Salvar →</button>
+      <button class="tbtn primary" onclick="confirmFirstSave()" style="flex:1">Publicar →</button>
       <button class="tbtn" onclick="closeSaveModal()">Cancelar</button>
     </div>
   </div>
@@ -228,7 +224,7 @@ const BLOCKS = {
         { label: 'Preparado por', value: 'Pedro Kunz' },
         { label: 'Para', value: '' },
         { label: 'Segmento', value: '' },
-        { label: 'Data', value: 'Maio de 2026' }
+        { label: 'Data', value: (()=>{ const n=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Sao_Paulo'})); return ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][n.getMonth()]+' de '+n.getFullYear(); })() }
       ]
     },
     preview: d => d.title,
@@ -551,6 +547,9 @@ let state = { blocks: [], sel: null, dragFrom: null };
 
 const uid = () => Math.random().toString(36).slice(2,8);
 const clone = x => JSON.parse(JSON.stringify(x));
+const dateBR = () => new Date().toLocaleDateString('pt-BR', {
+  timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit'
+}).split('/').reverse().join('-'); // → YYYY-MM-DD no fuso de Brasília
 
 function save() {
   localStorage.setItem('pk_builder_v2', JSON.stringify(state.blocks));
@@ -720,7 +719,10 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Meta</div>
       ${d.meta.map((m,i) => `<div class="row2">
         <input class="fi" style="max-width:90px" value="${esc(m.label)}" onchange="updMetaL('${id}',${i},this.value)">
-        <input class="fi" value="${esc(m.value)}" onchange="updMetaV('${id}',${i},this.value)">
+        ${m.label === 'Data'
+          ? `<input class="fi" type="date" value="${m.iso || ptDateToISO(m.value)}" onchange="updMetaDate('${id}',${i},this.value)">`
+          : `<input class="fi" value="${esc(m.value)}" onchange="updMetaV('${id}',${i},this.value)">`
+        }
       </div>`).join('')}`;
 
     case 'diagnostico': return `
@@ -729,7 +731,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Alertas</div>
       <div class="arr">
         ${d.alerts.map((a,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-rm" onclick="rmAlert('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','alerts',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','alerts',${i},1)">↓</button><button class="arr-rm" onclick="rmAlert('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(a.icon)}" placeholder="Emoji" onchange="updA('${id}',${i},'icon',this.value)">
           <input class="fi" value="${esc(a.title)}" placeholder="Título" onchange="updA('${id}',${i},'title',this.value)">
           <textarea class="ft" style="min-height:50px" onchange="updA('${id}',${i},'desc',this.value)">${esc(a.desc)}</textarea>
@@ -743,7 +745,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Números</div>
       <div class="arr">
         ${d.items.map((it,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Número ${i+1}</span><button class="arr-rm" onclick="rmStat('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Número ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','items',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','items',${i},1)">↓</button><button class="arr-rm" onclick="rmStat('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(it.value)}" placeholder="Ex: 7K" onchange="updStat('${id}',${i},'value',this.value)">
           <input class="fi" value="${esc(it.label)}" placeholder="Label" onchange="updStat('${id}',${i},'label',this.value)">
           <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;">
@@ -755,7 +757,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Alertas (opcional)</div>
       <div class="arr">
         ${d.alerts.map((a,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-rm" onclick="rmStatAlert('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','alerts',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','alerts',${i},1)">↓</button><button class="arr-rm" onclick="rmStatAlert('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(a.icon)}" placeholder="Emoji" onchange="updStatAlert('${id}',${i},'icon',this.value)">
           <input class="fi" value="${esc(a.title)}" placeholder="Título" onchange="updStatAlert('${id}',${i},'title',this.value)">
           <textarea class="ft" style="min-height:50px" onchange="updStatAlert('${id}',${i},'desc',this.value)">${esc(a.desc)}</textarea>
@@ -774,7 +776,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Alertas</div>
       <div class="arr">
         ${d.alerts.map((a,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-rm" onclick="rmPSAlert('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Alerta ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','alerts',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','alerts',${i},1)">↓</button><button class="arr-rm" onclick="rmPSAlert('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(a.icon)}" placeholder="Emoji" onchange="updPSAlert('${id}',${i},'icon',this.value)">
           <input class="fi" value="${esc(a.title)}" placeholder="Título" onchange="updPSAlert('${id}',${i},'title',this.value)">
           <textarea class="ft" style="min-height:50px" onchange="updPSAlert('${id}',${i},'desc',this.value)">${esc(a.desc)}</textarea>
@@ -788,7 +790,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Páginas</div>
       <div class="arr">
         ${d.rows.map((r,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Página ${i+1}</span><button class="arr-rm" onclick="rmSiteRow('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Página ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','rows',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','rows',${i},1)">↓</button><button class="arr-rm" onclick="rmSiteRow('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(r.page)}" placeholder="Nome" onchange="updSiteRow('${id}',${i},'page',this.value)">
           <input class="fi" value="${esc(r.children.join(', '))}" placeholder="Filhos separados por vírgula" onchange="updSiteChildren('${id}',${i},this.value)">
         </div>`).join('')}
@@ -801,7 +803,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Seções</div>
       <div class="arr">
         ${d.rows.map((r,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Seção ${i+1}</span><button class="arr-rm" onclick="rmLPRow('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Seção ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','rows',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','rows',${i},1)">↓</button><button class="arr-rm" onclick="rmLPRow('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(r.badge)}" placeholder="Nome" onchange="updLPRow('${id}',${i},'badge',this.value)">
           <textarea class="ft" style="min-height:50px" onchange="updLPRow('${id}',${i},'desc',this.value)">${esc(r.desc)}</textarea>
         </div>`).join('')}
@@ -813,7 +815,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Itens</div>
       <div class="arr">
         ${d.items.map((it,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Item ${i+1}</span><button class="arr-rm" onclick="rmCheck('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Item ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','items',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','items',${i},1)">↓</button><button class="arr-rm" onclick="rmCheck('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(it.text)}" placeholder="Texto" onchange="updCheck('${id}',${i},'text',this.value)">
           <input class="fi" value="${esc(it.sub)}" placeholder="Subtexto (opcional)" onchange="updCheck('${id}',${i},'sub',this.value)">
         </div>`).join('')}
@@ -827,7 +829,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Projetos (máx. 4)</div>
       <div class="arr">
         ${d.cards.map((c,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Projeto ${i+1}</span><button class="arr-rm" onclick="rmCard('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Projeto ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','cards',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','cards',${i},1)">↓</button><button class="arr-rm" onclick="rmCard('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(c.tag)}" placeholder="Tag" onchange="updCard('${id}',${i},'tag',this.value)">
           <input class="fi" value="${esc(c.name)}" placeholder="Nome" onchange="updCard('${id}',${i},'name',this.value)">
           <textarea class="ft" style="min-height:50px" onchange="updCard('${id}',${i},'desc',this.value)">${esc(c.desc)}</textarea>
@@ -844,7 +846,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Itens inclusos</div>
       <div class="arr">
         ${d.items.map((it,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Item ${i+1}</span><button class="arr-rm" onclick="rmPItem('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Item ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','items',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','items',${i},1)">↓</button><button class="arr-rm" onclick="rmPItem('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(it)}" onchange="updPItem('${id}',${i},this.value)">
         </div>`).join('')}
         <button class="btn-add" onclick="addPItem('${id}')">+ Item</button>
@@ -879,7 +881,7 @@ function editorForm(b) {
       <hr class="fdiv"><div class="fl">Passos</div>
       <div class="arr">
         ${d.steps.map((s,i) => `<div class="arr-item">
-          <div class="arr-head"><span class="arr-title">Passo ${i+1}</span><button class="arr-rm" onclick="rmStep('${id}',${i})">✕</button></div>
+          <div class="arr-head"><span class="arr-title">Passo ${i+1}</span><button class="arr-mv" onclick="moveArrayItem('${id}','steps',${i},-1)">↑</button><button class="arr-mv" onclick="moveArrayItem('${id}','steps',${i},1)">↓</button><button class="arr-rm" onclick="rmStep('${id}',${i})">✕</button></div>
           <input class="fi" value="${esc(s.num)}" placeholder="Passo 1" onchange="updStep('${id}',${i},'num',this.value)">
           <input class="fi" value="${esc(s.label)}" placeholder="Título" onchange="updStep('${id}',${i},'label',this.value)">
           <input class="fi" value="${esc(s.sub)}" placeholder="Subtexto" onchange="updStep('${id}',${i},'sub',this.value)">
@@ -904,6 +906,32 @@ function getB(id) { return state.blocks.find(b => b.id === id); }
 function upd(id, k, v) { const b=getB(id); if(b){b.data[k]=v; save(); renderCanvas();} }
 function updMetaL(id,i,v) { const b=getB(id); b.data.meta[i].label=v; save(); renderCanvas(); }
 function updMetaV(id,i,v) { const b=getB(id); b.data.meta[i].value=v; save(); renderCanvas(); }
+
+const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function ptDateToISO(pt) {
+  // "Junho de 2026" → "2026-06-01"
+  if (!pt) return '';
+  const parts = pt.split(' de ');
+  if (parts.length !== 2) return '';
+  const m = MESES_PT.indexOf(parts[0].trim()) + 1;
+  const y = parseInt(parts[1]);
+  if (!m || !y) return '';
+  return `${y}-${String(m).padStart(2,'0')}-01`;
+}
+
+function updMetaDate(id, i, iso) {
+  // "2026-06-15" → exibe "Junho de 2026", guarda o dia exato em .iso (pro filtro)
+  if (!iso) return;
+  const [y, m] = iso.split('-');
+  const formatted = `${MESES_PT[parseInt(m)-1]} de ${y}`;
+  const b = getB(id);
+  b.data.meta[i].value = formatted;
+  b.data.meta[i].iso = iso;
+  save();
+  renderCanvas();
+  renderEditor();
+}
 
 // Alerts
 function updA(id,i,k,v){ const b=getB(id); b.data.alerts[i][k]=v; save(); renderCanvas(); }
@@ -962,6 +990,18 @@ function addOptItem(id,opt){ const b=getB(id); b.data['opt'+opt].items.push('Nov
 function updStep(id,i,k,v){ const b=getB(id); b.data.steps[i][k]=v; save(); renderCanvas(); }
 function rmStep(id,i){ const b=getB(id); b.data.steps.splice(i,1); save(); renderAll(); }
 function addStep(id){ const b=getB(id); b.data.steps.push({num:`Passo ${b.data.steps.length+1}`,label:'Novo passo',sub:''}); save(); renderAll(); }
+
+function moveArrayItem(blockId, arrayPath, idx, dir) {
+  const b = getB(blockId);
+  if (!b) return;
+  const keys = arrayPath.split('.');
+  let arr = b.data;
+  for (const k of keys) arr = arr[k];
+  const j = idx + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  save(); renderAll();
+}
 
 /* =====================
    RENDER ALL
@@ -1063,15 +1103,33 @@ function buildHTML() {
     return def.render(b.data, String(n).padStart(2,'0'));
   }).join('\n');
 
+  // Extrai dados do cliente do bloco header para identificação no Clarity
+  const headerBlock = state.blocks.find(b => b.type === 'header');
+  const clientName  = headerBlock ? (headerBlock.data.title || 'Proposta') : 'Proposta';
+  const segmento    = headerBlock ? ((headerBlock.data.meta || []).find(m => m.label === 'Segmento')?.value || '') : '';
+
+  const clarityId = localStorage.getItem('pk_clarity_id') || 'x1gx53km8i';
+  const clarityScript = `<script type="text/javascript">
+(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${clarityId}");
+window.addEventListener('load', function() {
+  if (typeof clarity === 'function') {
+    clarity("set", "cliente",   "${clientName.replace(/"/g, '\\"')}");
+    clarity("set", "segmento",  "${segmento.replace(/"/g, '\\"')}");
+    clarity("set", "preparado_por", "Pedro Kunz");
+  }
+});
+<\/script>`;
+
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Proposta · Pedro Kunz</title>
+<title>Proposta · ${clientName} · Pedro Kunz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>${CSS}</style>
+${clarityScript}
 </head>
 <body>
 ${body}
@@ -1135,89 +1193,163 @@ function slugify(s) {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function openSaveModal() {
-  if (!state.blocks.length) { alert('Adicione pelo menos um bloco antes de salvar.'); return; }
-
-  // Auto-preenche a partir dos blocos existentes
-  const headerBlock = state.blocks.find(b => b.type === 'header');
-  const priceBlock  = state.blocks.find(b => b.type === 'precounico' || b.type === 'precoduplo');
-
-  if (headerBlock) {
-    const title = headerBlock.data.title || '';
-    document.getElementById('sm-client').value = title;
-    if (title) document.getElementById('sm-slug').value = slugify(title);
-    const seg  = (headerBlock.data.meta || []).find(m => m.label === 'Segmento');
-    const date = (headerBlock.data.meta || []).find(m => m.label === 'Data');
-    if (seg && seg.value)   document.getElementById('sm-niche').value = seg.value;
-    if (date && date.value) document.getElementById('sm-date').value  = date.value;
-  }
-  if (priceBlock) {
-    const price = priceBlock.type === 'precounico'
-      ? priceBlock.data.price
-      : (priceBlock.data.optB || {}).price;
-    if (price) document.getElementById('sm-value').value = price;
-  }
-
-  // Se estiver editando proposta existente, carrega os dados dela
-  const editId = new URLSearchParams(window.location.search).get('id');
-  if (editId) {
-    const existing = getProposals().find(p => p.id === editId);
-    if (existing) {
-      document.getElementById('sm-client').value = existing.client || '';
-      document.getElementById('sm-niche').value  = existing.niche  || '';
-      document.getElementById('sm-value').value  = existing.value  || '';
-      document.getElementById('sm-status').value = existing.status || 'neg';
-      document.getElementById('sm-date').value   = existing.date   || '';
-      document.getElementById('sm-slug').value   = existing.slug   || '';
-    }
-    document.getElementById('sm-title-text').textContent = 'Atualizar proposta';
-    document.getElementById('sm-save-btn').textContent   = 'Atualizar →';
-  } else {
-    document.getElementById('sm-title-text').textContent = 'Salvar proposta';
-    document.getElementById('sm-save-btn').textContent   = 'Salvar →';
-    if (!document.getElementById('sm-date').value) {
-      document.getElementById('sm-date').value = 'Mai 2026';
-    }
-  }
-
-  document.getElementById('save-modal').classList.add('open');
-}
-
 function closeSaveModal() {
   document.getElementById('save-modal').classList.remove('open');
 }
 
-function saveProposal() {
-  const client = document.getElementById('sm-client').value.trim();
-  if (!client) { alert('Digite o nome do cliente.'); return; }
+const SB_URL = 'https://ifstkixcpssqtbzrklzc.supabase.co/rest/v1';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmc3RraXhjcHNzcXRienJrbHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MjQ5MjMsImV4cCI6MjA5NjEwMDkyM30.0SXA-dDOlltjz8pr6LYLhgZAsLf70kXu3vdlggKVuSc';
 
-  const editId = new URLSearchParams(window.location.search).get('id');
-  const proposals = getProposals();
-  const existing  = editId ? proposals.find(p => p.id === editId) : null;
-
-  const proposal = {
-    id:        existing ? existing.id : uid(),
-    client,
-    niche:     document.getElementById('sm-niche').value.trim(),
-    value:     document.getElementById('sm-value').value.trim(),
-    status:    document.getElementById('sm-status').value,
-    date:      document.getElementById('sm-date').value.trim(),
-    slug:      document.getElementById('sm-slug').value.trim() || null,
-    createdAt: existing ? existing.createdAt : new Date().toISOString().slice(0, 10),
-    updatedAt: new Date().toISOString().slice(0, 10),
-    blocks:    clone(state.blocks),
-    html:      buildHTML()
+async function syncToSupabase(proposal) {
+  const HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${SB_KEY}`,
+    'apikey': SB_KEY
+  };
+  const data = {
+    id: proposal.id, client: proposal.client, niche: proposal.niche || null,
+    value: proposal.value || null, status: proposal.status || 'neg',
+    date: proposal.date || null, slug: proposal.slug || null,
+    blocks: proposal.blocks || null, html: proposal.html || null,
+    published: true, locked: proposal.locked || false,
+    createdat: proposal.createdAt || null, updatedat: proposal.updatedAt || null
   };
 
-  if (existing) {
-    const idx = proposals.findIndex(p => p.id === editId);
-    proposals[idx] = proposal;
-  } else {
-    proposals.unshift(proposal);
+  try {
+    // UPSERT: insert ou update em um único request, sem race condition
+    const res = await fetch(`${SB_URL}/propostas`, {
+      method: 'POST',
+      headers: {
+        ...HEADERS,
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      console.error('Supabase UPSERT error:', res.status, errText);
+    }
+    return res.ok;
+  } catch(e) {
+    console.error('Supabase sync exception:', e);
+    return false;
   }
+}
 
+function extractFromBlocks(existing) {
+  const h = state.blocks.find(b => b.type === 'header');
+  const p = state.blocks.find(b => b.type === 'precounico' || b.type === 'precoduplo');
+  const seg  = (h?.data?.meta || []).find(m => m.label === 'Segmento');
+  const datM = (h?.data?.meta || []).find(m => m.label === 'Data');
+  let value = existing?.value || '';
+  if (p) {
+    value = p.type === 'precounico'
+      ? (p.data.price || '')
+      : `${p.data.optA?.price || ''} - ${p.data.optB?.price || ''}`.replace(/^ - $/, '');
+  }
+  const dateTxt = datM?.value || existing?.date || '';
+  const dateISO = datM?.iso || ptDateToISO(datM?.value || '');
+  return {
+    client: h?.data?.title || existing?.client || '',
+    niche:  seg?.value     || existing?.niche  || '',
+    date:   dateTxt,
+    value,
+    // Data do cabecalho vira a data oficial (exibida e filtrada no dash)
+    ...(dateISO ? { createdAt: dateISO } : {})
+  };
+}
+
+/* Ponto de entrada do botão Salvar */
+function handleSave() {
+  if (!state.blocks.length) { alert('Adicione pelo menos um bloco.'); return; }
+  const editId = new URLSearchParams(window.location.search).get('id');
+  const existing = editId ? getProposals().find(p => p.id === editId) : null;
+
+  if (existing && existing.slug) {
+    // Já tem slug definido: salva direto, sem modal
+    saveDirectly(existing);
+  } else {
+    // Nova proposta ou sem slug ainda: pede slug uma única vez
+    const h = state.blocks.find(b => b.type === 'header');
+    const suggested = slugify(h?.data?.title || '');
+    const slugInput = document.getElementById('sm-slug');
+    slugInput.value = existing?.slug || suggested;
+    document.getElementById('slug-preview').textContent = slugInput.value;
+    document.getElementById('save-modal').classList.add('open');
+  }
+}
+
+/* Confirmação do primeiro slug (nova proposta) */
+async function confirmFirstSave() {
+  const slug = document.getElementById('sm-slug').value.trim();
+  if (!slug) { alert('Define um slug para a URL da proposta.'); return; }
+  closeSaveModal();
+
+  const editId   = new URLSearchParams(window.location.search).get('id');
+  const existing = editId ? getProposals().find(p => p.id === editId) : null;
+  const meta     = extractFromBlocks(existing);
+
+  const proposal = {
+    id:        existing?.id || uid(),
+    ...meta,
+    status:    existing?.status || 'neg',
+    slug,
+    createdAt: meta.createdAt || existing?.createdAt || dateBR(),
+    updatedAt: dateBR(),
+    blocks:    clone(state.blocks),
+    html:      buildHTML(),
+    locked:    existing?.locked || false
+  };
+
+  await doSave(proposal, editId);
+}
+
+/* Salva proposta existente direto, sem modal */
+async function saveDirectly(existing) {
+  const meta = extractFromBlocks(existing);
+  const proposal = {
+    ...existing,
+    ...meta,
+    updatedAt: dateBR(),
+    blocks: clone(state.blocks),
+    html:   buildHTML()
+  };
+  await doSave(proposal, existing.id);
+}
+
+/* Núcleo do save: localStorage + Supabase + feedback */
+async function doSave(proposal, editId) {
+  const btn    = document.getElementById('save-btn');
+  const status = document.getElementById('pub-status');
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  status.textContent = 'Salvando...';
+  status.style.color = 'var(--muted)';
+
+  // Atualiza localStorage
+  const proposals = getProposals();
+  const idx = proposals.findIndex(p => p.id === proposal.id);
+  if (idx >= 0) proposals[idx] = proposal;
+  else proposals.unshift(proposal);
   setProposals(proposals);
-  window.location.href = 'index.html';
+
+  // Supabase
+  const ok = await syncToSupabase(proposal).catch(() => false);
+
+  btn.disabled = false;
+  btn.textContent = 'Salvar →';
+
+  if (ok) {
+    status.textContent = '✓ Publicado';
+    status.style.color = '#4CAF50';
+    // Redireciona para o dashboard após 1.5s
+    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+  } else {
+    status.textContent = '✗ Erro — tente de novo';
+    status.style.color = '#e55';
+    // Não redireciona, deixa o usuário tentar de novo
+    setTimeout(() => { status.textContent = ''; }, 5000);
+  }
 }
 
 // Fecha modal clicando fora

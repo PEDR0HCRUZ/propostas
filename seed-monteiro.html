@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Carregando proposta Monteiro...</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0D0D0D; color: #CCC;
+         display: flex; align-items: center; justify-content: center;
+         height: 100vh; margin: 0; flex-direction: column; gap: 12px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid #333;
+             border-top-color: #C4A265; border-radius: 50%;
+             animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  p { font-size: 13px; color: #666; }
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+<p>Carregando proposta Monteiro no builder...</p>
+<script>
+(function() {
+
+const uid = () => Math.random().toString(36).slice(2, 8);
+
+const BLOCKS = [
+  {
+    id: uid(), type: 'header',
+    data: {
+      supertitle: 'Proposta de criação de site',
+      title: 'Monteiro',
+      meta: [
+        { label: 'Preparado por', value: 'Pedro Kunz' },
+        { label: 'Para',          value: 'Monteiro' },
+        { label: 'Segmento',      value: 'Autor · Cantor · Arte Independente' },
+        { label: 'Data',          value: 'Maio de 2026' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'diagnostico',
+    data: {
+      heading: 'O que identificamos',
+      body: 'O Monteiro construiu uma obra com propósito real — um livro, canções e produtos que falam sobre um tema sério e necessário. O site precisa estar à altura dessa responsabilidade.',
+      alerts: [
+        { icon: '📚', title: 'A obra não tem um ponto de encontro digital', desc: 'Quem busca o trabalho do Monteiro online não encontra um lugar que apresente tudo com o cuidado que o tema merece.' },
+        { icon: '🎵', title: 'As canções ficam restritas a quem já conhece', desc: 'A música é parte essencial da mensagem. Sem acesso fácil, o alcance fica limitado a quem já teve contato pessoal com o artista.' },
+        { icon: '👕', title: 'Os produtos perdem sentido sem o contexto da obra', desc: 'Uma camiseta com frase do livro só tem impacto quando quem a vê entende de onde vem. O site cria esse contexto.' },
+        { icon: '🔗', title: 'Sem um hub central, a mensagem se dilui', desc: 'Livro, canções e produtos espalhados em plataformas diferentes enfraquecem a força de uma obra que deveria falar com uma só voz.' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'textlivre',
+    data: {
+      heading: 'Conceito e referências',
+      body: `<p>As referências escolhidas - <strong>Freshburn</strong> e <strong>Blimmy</strong> - têm em comum algo importante: o site é uma extensão do universo do artista, não uma loja. O visual carrega intenção. O som tem lugar. Cada elemento comunica antes mesmo de qualquer texto.</p>
+
+<p>O site do Monteiro precisa ter esse mesmo peso. Não animado por animação - mas vivo porque o tema exige presença. Um lugar onde a música e as palavras chegam antes de qualquer convite à compra. Onde quem entra entende, antes de qualquer coisa, o que essa obra representa.</p>
+
+<p><strong>Sobre os produtos:</strong> o livro e as camisetas existem para levar a mensagem além do palco. A venda é um meio, não o fim. Por isso a proposta é manter checkout externo - Amazon, Mercado Livre ou WhatsApp - sem construir uma estrutura de e-commerce que desvia o foco. O site apresenta, as plataformas processam.</p>
+
+<p><strong>Camisetas com áudio:</strong> cada peça carrega uma frase da obra. No site, ao tocar o trecho correspondente, a frase ganha contexto completo. Não é um recurso de venda - é uma forma de fazer a mensagem durar mais do que o momento em que foi lida.</p>`
+    }
+  },
+  {
+    id: uid(), type: 'lpsections',
+    data: {
+      heading: 'Estrutura do site',
+      body: 'Uma página com fluxo narrativo - cada seção aprofunda a obra antes de qualquer convite à compra.',
+      rows: [
+        { badge: 'Abertura',        desc: 'Tela cheia com identidade visual e música tocando ao entrar (com opção de silenciar). Sem headline de venda - só presença.' },
+        { badge: 'A obra',          desc: 'Quem é o Monteiro e o que move esse trabalho. Texto direto, sem excessos.' },
+        { badge: 'O livro',         desc: 'Capa em destaque, tema abordado e trechos selecionados. Link para adquirir via Amazon ou Mercado Livre.' },
+        { badge: 'Próximas obras',  desc: 'Capas dos livros quase prontos, sem data - só para que o leitor saiba que há mais.' },
+        { badge: 'Camisetas',       desc: 'Cada peça com a frase e o trecho de áudio correspondente. Compra via link externo.' },
+        { badge: 'Canções',         desc: 'Player com as músicas disponíveis. As letras sustentam a obra, não são apenas fundo.' },
+        { badge: 'Portfólio',       desc: 'Capas, artes e registros visuais da obra.' },
+        { badge: 'Contato',         desc: 'Canal direto para quem quer shows, parcerias ou quer levar a obra para algum espaço.' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'portfolio',
+    data: {
+      heading: 'Materiais disponíveis',
+      body: 'O Monteiro já tem identidade visual consolidada - logo, capas dos livros e arte das camisetas. O site usa tudo isso.',
+      cards: [
+        { tag: 'Identidade Visual', name: 'Logo do artista',           desc: 'Identidade visual já definida. Usada no header, favicon e todas as seções.', url: '' },
+        { tag: 'Livro publicado',   name: 'Capa do livro principal',   desc: 'Arte finalizada, pronta para ser o elemento central do hero e da seção do livro.', url: '' },
+        { tag: 'Em breve',          name: 'Capas dos próximos livros', desc: 'Material para a seção Em breve - gera expectativa nos leitores.', url: '' },
+        { tag: 'Produto',           name: 'Fotos das camisetas',       desc: 'Fotos dos produtos para a galeria interativa com player de audio.', url: '' },
+        { tag: 'Audio',             name: 'Trechos das cancoes',       desc: 'Arquivos de audio para o player e para a interacao das camisetas.', url: '' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'checklist',
+    data: {
+      heading: 'O que está incluso',
+      items: [
+        { text: 'Site animado e imersivo',                   sub: 'Inspirado nas referências Freshburn e Blimmy' },
+        { text: 'Player de música no header',                sub: 'Toca automaticamente ao entrar, com botão de silenciar' },
+        { text: 'Galeria de camisetas com áudio',            sub: 'Hover/toque toca o trecho da canção correspondente' },
+        { text: 'Seção de livros com checkout externo',      sub: 'Botão de compra apontando para Amazon ou Mercado Livre' },
+        { text: 'Seção "Em breve" para próximos livros',     sub: 'Capas e descrição dos livros quase prontos' },
+        { text: 'Portfólio visual da obra',                  sub: 'Galeria de capas, artes e materiais' },
+        { text: 'Player de canções',                         sub: 'Lista de faixas disponíveis com player embutido' },
+        { text: 'Responsivo para celular',                   sub: 'Experiência completa em qualquer dispositivo' },
+        { text: 'SEO básico configurado',                    sub: 'Para aparecer nas buscas pelo nome do artista' },
+        { text: 'Hospedagem + domínio inclusos no 1º ano',   sub: 'Sem custo adicional no primeiro ano' },
+        { text: '30 dias de suporte técnico',                sub: 'Ajustes após a entrega' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'precounico',
+    data: {
+      heading: 'Investimento',
+      tag: 'Site completo de artista',
+      price: 'R$ 1.999',
+      meta: 'À vista · WordPress + Elementor',
+      items: [
+        'Site animado com identidade visual forte',
+        'Player de música automático no header',
+        'Camisetas com interação de áudio',
+        'Seção de livros com checkout externo',
+        'Próximos lançamentos em destaque',
+        'Portfólio visual completo',
+        'Player de canções',
+        'Hospedagem + domínio inclusos no 1º ano',
+        '30 dias de suporte técnico',
+        'Entrega em até 21 dias úteis'
+      ],
+      note: 'Parcelamento em até 12x no cartão com juros da maquininha.'
+    }
+  },
+  {
+    id: uid(), type: 'passos',
+    data: {
+      heading: 'Próximos passos',
+      steps: [
+        { num: 'Passo 1', label: 'Aprovação do orçamento',  sub: 'Confirmação e pagamento de entrada' },
+        { num: 'Passo 2', label: 'Envio dos materiais',     sub: 'Logo, fotos, áudios, capas e textos sobre o artista' },
+        { num: 'Passo 3', label: 'Início do projeto',       sub: 'Conceito visual apresentado em até 5 dias úteis' }
+      ]
+    }
+  }
+];
+
+const proposalId = uid();
+
+const proposal = {
+  id:        proposalId,
+  client:    'Monteiro',
+  niche:     'Defesa da criança e adolescente',
+  value:     'R$ 1.999',
+  status:    'env',
+  date:      'Mai 2026',
+  slug:      'monteiro',
+  createdAt: '2026-05-01',
+  updatedAt: '2026-05-01',
+  blocks:    BLOCKS,
+  html:      null,
+  published: false
+};
+
+try {
+  const existing = JSON.parse(localStorage.getItem('pk_proposals') || '[]');
+  const filtered = existing.filter(p => p.slug !== 'monteiro');
+  filtered.unshift(proposal);
+  localStorage.setItem('pk_proposals', JSON.stringify(filtered));
+  localStorage.setItem('pk_builder_v2', JSON.stringify(BLOCKS));
+} catch(e) {}
+
+window.location.href = 'builder.html?id=' + proposalId;
+
+})();
+</script>
+</body>
+</html>

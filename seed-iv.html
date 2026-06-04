@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Carregando proposta IV Soluções...</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0D0D0D; color: #CCC;
+         display: flex; align-items: center; justify-content: center;
+         height: 100vh; margin: 0; flex-direction: column; gap: 12px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid #333;
+             border-top-color: #C4A265; border-radius: 50%;
+             animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  p { font-size: 13px; color: #666; }
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+<p>Carregando proposta IV Soluções no builder...</p>
+<script>
+(function() {
+
+const uid = () => Math.random().toString(36).slice(2, 8);
+
+const BLOCKS = [
+  {
+    id: uid(), type: 'header',
+    data: {
+      supertitle: 'Proposta de redesign de site',
+      title: 'IV Soluções Elétrica',
+      meta: [
+        { label: 'Preparado por', value: 'Pedro Kunz' },
+        { label: 'Para',          value: 'IV Soluções' },
+        { label: 'Segmento',      value: 'Engenharia Elétrica · Ceará' },
+        { label: 'Data',          value: 'Junho de 2026' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'diagnostico',
+    data: {
+      heading: 'O que encontramos no site atual',
+      body: 'O site da IV Soluções tem muito conteúdo — mas isso está atrapalhando, não ajudando. O visitante chega sem saber por onde começar e sai sem contato.',
+      alerts: [
+        { icon: '📋', title: 'Menu com mais de 100 páginas de "Informações"',    desc: 'Esse menu é SEO interno e não serve o visitante. Confunde quem está tentando entender o que a empresa faz.' },
+        { icon: '⚡', title: '15 serviços soltos sem agrupamento',                desc: 'O cliente em potencial não sabe por onde começar. Serviços precisam de contexto para gerar interesse.' },
+        { icon: '📱', title: 'Sem foco em conversão',                             desc: 'A home tem muita informação e poucos momentos de CTA direto. O visitante não é conduzido até o WhatsApp.' },
+        { icon: '🔍', title: 'Identidade visual genérica',                        desc: 'O site não comunica autoridade nem especialização. Parece um template sem personalidade da marca.' },
+        { icon: '📊', title: 'Área do Cliente escondida como seção da home',      desc: 'O portal do cliente deveria ser um link discreto, não uma seção inteira que distrai o visitante.' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'lpsections',
+    data: {
+      heading: 'Como vai ser organizado',
+      body: 'Uma única página com fluxo claro: apresentação, autoridade, serviços agrupados, prova social e contato direto.',
+      rows: [
+        { badge: 'Hero',          desc: 'Headline de impacto, subtítulo com especialização e CTA direto para WhatsApp.' },
+        { badge: 'Sobre',         desc: 'Fundada em 2020, presença em todos os estados, +50 serviços. Transmite autoridade rápido.' },
+        { badge: 'Serviços',      desc: '5 categorias claras: Projetos Elétricos · Energia Solar · Combate a Incêndio / SPDA · Subestações & Loteamentos · Laudos Técnicos.' },
+        { badge: 'Como funciona', desc: '3 passos simples: entre em contato → alinhamento técnico → entrega do projeto.' },
+        { badge: 'Parceiros',     desc: 'Logos dos 7 clientes/parceiros como prova social rápida.' },
+        { badge: 'Depoimentos',   desc: 'Se houver, 2-3 depoimentos de clientes com nome e empresa.' },
+        { badge: 'CTA Final',     desc: 'Bloco de fechamento com WhatsApp, email e localização (Tianguá/CE).' },
+        { badge: 'Rodapé',        desc: 'Links essenciais + link discreto para Área do Cliente.' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'sitemap',
+    data: {
+      heading: 'Mapa do site atual vs. LP',
+      body: 'O site atual tem dezenas de páginas. A LP consolida tudo numa única experiência linear que conduz ao contato.',
+      rows: [
+        { page: 'Home',            children: ['Hero', 'Serviços (15)', 'Área do Cliente', 'Parceiros', 'Sobre', 'FAQ'] },
+        { page: 'Quem Somos',      children: ['História', 'Missão/Visão/Valores'] },
+        { page: 'Serviços (15)',   children: ['Página individual por serviço'] },
+        { page: 'Informações',     children: ['+100 páginas SEO (spda, fotovoltaica, subestação...)'] },
+        { page: 'Área do Cliente', children: ['Portal externo (volteksys)'] },
+        { page: 'Contato',         children: ['Formulário', 'Localização'] }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'checklist',
+    data: {
+      heading: 'O que está incluso',
+      items: [
+        { text: 'Concepção e aprovação do design',              sub: 'Apresentação visual antes do desenvolvimento' },
+        { text: 'Desenvolvimento da landing page',              sub: 'WordPress + Elementor, responsivo' },
+        { text: 'Copywriting das seções',                       sub: 'Textos adaptados para conversão' },
+        { text: 'Agrupamento e apresentação dos 15 serviços',   sub: 'Em 5 categorias visuais claras' },
+        { text: 'Integração com WhatsApp',                      sub: 'CTAs diretos em todas as dobras' },
+        { text: 'SEO básico configurado',                       sub: 'Meta tags, título e indexação' },
+        { text: 'Performance e carregamento otimizados',        sub: 'Imagens e código enxutos' },
+        { text: 'Hospedagem + domínio inclusos no 1º ano',      sub: 'Sem custo adicional no primeiro ano' },
+        { text: '30 dias de suporte técnico',                   sub: 'Ajustes após a entrega' }
+      ]
+    }
+  },
+  {
+    id: uid(), type: 'precounico',
+    data: {
+      heading: 'Prazo e investimento',
+      tag: 'Landing page completa',
+      price: 'R$ 1.499',
+      meta: 'À vista · WordPress + Elementor',
+      items: [
+        'Concepção e aprovação do design',
+        'Desenvolvimento e aprovação final',
+        'Copywriting das seções principais',
+        'Otimização de SEO e performance',
+        'Site interativo, com movimento',
+        'Integração com WhatsApp em todos os CTAs',
+        'Hospedagem + domínio inclusos no primeiro ano',
+        '30 dias de suporte técnico',
+        'Entrega em até 14 dias úteis'
+      ],
+      note: 'Parcelamento em até 12x no cartão com juros da maquininha.'
+    }
+  },
+  {
+    id: uid(), type: 'passos',
+    data: {
+      heading: 'Próximos passos',
+      steps: [
+        { num: 'Passo 1', label: 'Aprovação do orçamento', sub: 'Confirmação e pagamento de entrada' },
+        { num: 'Passo 2', label: 'Envio dos materiais',    sub: 'Logo, fotos e textos dos serviços' },
+        { num: 'Passo 3', label: 'Início do projeto',      sub: 'Design apresentado em até 3 dias úteis' }
+      ]
+    }
+  }
+];
+
+const proposalId = uid();
+
+const proposal = {
+  id:        proposalId,
+  client:    'IV Soluções Elétrica',
+  niche:     'Engenharia Elétrica · Ceará',
+  value:     'R$ 1.499',
+  status:    'neg',
+  date:      'Jun 2026',
+  slug:      'iv-solucoes',
+  createdAt: new Date().toISOString().slice(0, 10),
+  updatedAt: new Date().toISOString().slice(0, 10),
+  blocks:    BLOCKS,
+  html:      null,
+  published: false
+};
+
+// Salva na lista de propostas
+try {
+  const existing = JSON.parse(localStorage.getItem('pk_proposals') || '[]');
+  // Remove se já existe para não duplicar
+  const filtered = existing.filter(p => p.slug !== 'iv-solucoes');
+  filtered.unshift(proposal);
+  localStorage.setItem('pk_proposals', JSON.stringify(filtered));
+
+  // Coloca os blocos no canvas do builder
+  localStorage.setItem('pk_builder_v2', JSON.stringify(BLOCKS));
+} catch(e) {}
+
+// Redireciona para o builder com o ID da proposta
+window.location.href = 'builder.html?id=' + proposalId;
+
+})();
+</script>
+</body>
+</html>

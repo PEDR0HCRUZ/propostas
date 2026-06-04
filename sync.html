@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Sync Supabase</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0D0D0D; color: #CCC; padding: 32px; max-width: 700px; margin: 0 auto; }
+  h2 { color: #C4A265; margin-bottom: 24px; }
+  .row { background: #141414; border: 1px solid #222; border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+  .name { flex: 1; font-weight: 600; color: #EDE7DA; font-size: 13px; }
+  .slug { font-size: 11px; color: #555; }
+  .status { font-size: 12px; font-weight: 600; }
+  .ok  { color: #4CAF50; }
+  .err { color: #e55; }
+  .warn { color: #E5A800; }
+  .btn { padding: 6px 14px; border-radius: 6px; border: 1px solid #333; background: none; color: #CCC; cursor: pointer; font-family: inherit; font-size: 12px; }
+  .btn:hover { border-color: #C4A265; color: #C4A265; }
+  .btn-all { background: #C4A265; color: #111; border-color: #C4A265; font-weight: 700; padding: 10px 24px; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+<h2>☁ Sync Supabase</h2>
+<button class="btn btn-all" onclick="syncAll()">↑ Publicar todas no Supabase</button>
+<div id="list">Carregando...</div>
+
+<script>
+const SB_URL = 'https://ifstkixcpssqtbzrklzc.supabase.co/rest/v1';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmc3RraXhjcHNzcXRienJrbHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MjQ5MjMsImV4cCI6MjA5NjEwMDkyM30.0SXA-dDOlltjz8pr6LYLhgZAsLf70kXu3vdlggKVuSc';
+
+function getProposals() {
+  try { return JSON.parse(localStorage.getItem('pk_proposals') || '[]'); } catch { return []; }
+}
+
+async function pushOne(p) {
+  const data = {
+    id: p.id, client: p.client, niche: p.niche || null,
+    value: p.value || null, status: p.status || 'neg',
+    date: p.date || null, slug: p.slug || null,
+    blocks: p.blocks || null, html: p.html || null,
+    published: !!p.published, locked: !!p.locked,
+    createdat: p.createdAt || null, updatedat: p.updatedAt || null
+  };
+  const res = await fetch(`${SB_URL}/propostas`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SB_KEY}`,
+      'apikey': SB_KEY,
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`${res.status}: ${txt}`);
+  }
+  return true;
+}
+
+async function syncOne(id) {
+  const proposals = getProposals();
+  const p = proposals.find(x => x.id === id);
+  const statusEl = document.getElementById('s-' + id);
+  if (!p) return;
+  statusEl.textContent = '⏳ Enviando...';
+  statusEl.className = 'status warn';
+  try {
+    await pushOne(p);
+    statusEl.textContent = '✓ Publicado';
+    statusEl.className = 'status ok';
+  } catch(e) {
+    statusEl.textContent = '✗ ' + e.message;
+    statusEl.className = 'status err';
+  }
+}
+
+async function syncAll() {
+  const proposals = getProposals().filter(p => p.slug && p.html);
+  for (const p of proposals) await syncOne(p.id);
+}
+
+function render() {
+  const proposals = getProposals();
+  const el = document.getElementById('list');
+  if (!proposals.length) { el.innerHTML = '<p style="color:#555">Nenhuma proposta no localStorage.</p>'; return; }
+  el.innerHTML = proposals.map(p => `
+    <div class="row">
+      <div>
+        <div class="name">${p.client}</div>
+        <div class="slug">${p.slug ? '/ver?s=' + p.slug : 'sem slug'} · html: ${p.html ? p.html.length + ' chars' : 'null'}</div>
+      </div>
+      <span id="s-${p.id}" class="status ${p.html && p.slug ? 'warn' : 'err'}">${p.html && p.slug ? '— pendente' : 'sem html/slug'}</span>
+      ${p.html && p.slug ? `<button class="btn" onclick="syncOne('${p.id}')">↑ Publicar</button>` : ''}
+      ${p.slug ? `<a class="btn" href="/ver?s=${p.slug}" target="_blank">Abrir →</a>` : ''}
+    </div>
+  `).join('');
+}
+
+render();
+</script>
+</body>
+</html>

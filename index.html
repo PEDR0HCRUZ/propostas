@@ -62,7 +62,11 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .table-wrap { overflow-x: auto; }
 .prop-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .prop-table thead tr { border-bottom: 1px solid var(--border); }
-.prop-table th { padding: 10px 14px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+.prop-table th { padding: 10px 14px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); cursor: pointer; transition: color .15s; user-select: none; }
+.prop-table th:hover { color: var(--cream); }
+.prop-table th.sort-active { color: var(--gold); }
+.sort-ind { font-size: 8px; margin-left: 4px; font-weight: 400; display: none; }
+.prop-table th.sort-active .sort-ind { display: inline; }
 .prop-table tbody tr { border-bottom: 1px solid var(--row-sep); transition: background .1s; }
 .prop-table tbody tr:hover { background: var(--row-hover); }
 .prop-table tbody tr:last-child { border-bottom: none; }
@@ -99,9 +103,30 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .btn-act.act-open:hover     { color: var(--cream);  border-color: #444; }
 .btn-act.act-copy:hover     { color: var(--gold);   border-color: var(--gold); }
 .btn-act.act-copy.copied    { color: #4CAF50;       border-color: #4CAF50; }
+.btn-act.act-dup:hover      { color: var(--gold);   border-color: var(--gold); }
 .btn-act.act-publish:hover  { color: #4CAF50;       border-color: #4CAF50; }
 .btn-act.act-export:hover   { color: #4DA6FF;       border-color: #4DA6FF; }
 .btn-act.act-delete:hover   { color: #e55;         border-color: #e55; }
+
+/* DROPDOWN MENU */
+.action-menu { position: relative; display: inline-block; }
+.action-dots { font-size: 15px; font-weight: 700; padding: 4px 9px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--muted); font-family: inherit; transition: .15s; line-height: 1; letter-spacing: 1px; }
+.action-dots:hover { color: var(--cream); border-color: #444; }
+.action-dropdown { display: none; position: fixed; background: var(--card); border: 1px solid var(--border); border-radius: 8px; min-width: 170px; z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,.5); overflow: hidden; }
+.action-dropdown.open { display: block; }
+.dd-item { display: block; width: 100%; padding: 9px 14px; font-size: 12px; font-weight: 500; text-align: left; border: none; background: none; color: var(--text); cursor: pointer; font-family: inherit; transition: background .1s; white-space: nowrap; text-decoration: none; }
+.dd-item:hover { background: var(--row-hover); color: var(--cream); }
+.dd-item.dd-lock:hover { color: #E5A800; }
+.dd-item.dd-unlock:hover { color: #4CAF50; }
+.dd-sep { height: 1px; background: var(--border); margin: 3px 0; }
+.locked-badge { font-size: 10px; color: #E5A800; margin-left: 6px; vertical-align: middle; }
+
+/* FILTER BAR */
+.filter-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-right: 4px; }
+.filter-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--muted); cursor: pointer; font-family: inherit; transition: .15s; white-space: nowrap; }
+.filter-btn:hover { color: var(--cream); border-color: #444; }
+.filter-btn.active { background: var(--gold); color: #111; border-color: var(--gold); }
 
 /* EMPTY STATE */
 .empty-state { padding: 80px 24px; text-align: center; }
@@ -193,7 +218,11 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 <div class="topbar">
   <span class="tb-logo">Pedro Kunz</span>
   <div class="tb-sep"></div>
-  <button class="tbtn" onclick="importFromVercel()" title="Importar propostas do painel Vercel">⬇ Importar anteriores</button>
+  <button class="tbtn" id="price-toggle-btn" onclick="togglePrices()" title="Mostrar/ocultar valores">R$ ···</button>
+  <button class="tbtn" onclick="backupProposals()" title="Baixar backup JSON de todas as propostas">💾 Backup</button>
+  <label class="tbtn" title="Restaurar propostas de um backup JSON" style="cursor:pointer">
+    ↩ Restaurar<input type="file" accept=".json" onchange="restoreBackup(this)" style="display:none">
+  </label>
   <a class="tbtn primary" href="builder.html?new=1">+ Nova proposta</a>
   <a class="tbtn" href="builder.html">Abrir builder</a>
   <button class="tbtn" id="theme-btn" onclick="toggleTheme()" title="Alternar tema">☀️</button>
@@ -205,16 +234,25 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 
   <div class="stats" id="stats"></div>
 
-  <div class="section-title">Todas as propostas</div>
+  <div class="filter-bar">
+    <span class="filter-label">Período</span>
+    <button class="filter-btn active" data-filter="all"   onclick="setFilter('all')">Todas</button>
+    <button class="filter-btn"        data-filter="today" onclick="setFilter('today')">Hoje</button>
+    <button class="filter-btn"        data-filter="week"  onclick="setFilter('week')">Esta semana</button>
+    <button class="filter-btn"        data-filter="month" onclick="setFilter('month')">Este mês</button>
+    <button class="filter-btn"        data-filter="year"  onclick="setFilter('year')">Este ano</button>
+  </div>
+
+  <div class="section-title" id="table-section-title">Todas as propostas</div>
 
   <div class="table-wrap" id="table-wrap">
     <table class="prop-table">
       <thead>
         <tr>
-          <th>Cliente</th>
-          <th>Valor</th>
-          <th>Status</th>
-          <th>Data</th>
+          <th onclick="setSortBy('client')" id="h-client">Cliente <span class="sort-ind"></span></th>
+          <th onclick="setSortBy('value')" id="h-value">Valor <span class="sort-ind"></span></th>
+          <th onclick="setSortBy('status')" id="h-status">Status <span class="sort-ind"></span></th>
+          <th onclick="setSortBy('createdAt')" id="h-date">Data <span class="sort-ind"></span></th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -259,21 +297,18 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 <!-- SETTINGS MODAL -->
 <div id="settings-modal" class="modal-overlay">
   <div class="cfg-box">
-    <div class="cfg-title">⚙ Configurar publicação automática</div>
-
-    <div class="cfg-steps">
-      <div class="cfg-step"><strong>1.</strong> Crie um repositório no GitHub: <a href="https://github.com/new" target="_blank">github.com/new</a> — nome sugerido: <strong>propostas-pedrokunz</strong></div>
-      <div class="cfg-step"><strong>2.</strong> No terminal, dentro da pasta <strong>propostas-pedrokunz/</strong>, rode:<br><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px">git init &amp;&amp; git add . &amp;&amp; git commit -m "init" &amp;&amp; git remote add origin [url-do-repo] &amp;&amp; git push -u origin main</code></div>
-      <div class="cfg-step"><strong>3.</strong> Em <a href="https://vercel.com/dashboard" target="_blank">vercel.com</a>, conecte o projeto ao repositório GitHub (Settings → Git)</div>
-      <div class="cfg-step"><strong>4.</strong> Gere um token em <a href="https://github.com/settings/tokens/new?scopes=repo&description=propostas-pedrokunz" target="_blank">github.com/settings/tokens</a> — escopo: <strong>repo</strong></div>
+    <div class="cfg-title">⚙ Configurações</div>
+    <div class="fg">
+      <div class="fl">Meu WhatsApp (com DDI+DDD, sem espaços)</div>
+      <input class="fi" id="cfg-whatsapp" placeholder="5588992077721">
     </div>
-
-    <div class="fg"><div class="fl">GitHub Token</div><input class="fi" type="password" id="cfg-token" placeholder="ghp_..."></div>
-    <div class="fg"><div class="fl">Repositório (usuario/nome)</div><input class="fi" id="cfg-repo" placeholder="pedrokunz/propostas-pedrokunz"></div>
-    <div class="cfg-note">Após salvar, o botão <strong>↑ Publicar</strong> envia o HTML direto para o GitHub e o Vercel faz deploy automático em ~30 segundos.</div>
-
+    <div class="fg">
+      <div class="fl">Microsoft Clarity ID <span style="font-weight:400;text-transform:none;letter-spacing:0">(rastreia comportamento dos clientes nas propostas)</span></div>
+      <input class="fi" id="cfg-clarity" placeholder="x1gx53km8i">
+    </div>
+    <div class="cfg-note">As propostas são publicadas automaticamente no Supabase ao salvar. O Clarity é injetado em todo HTML gerado.</div>
     <div class="cfg-actions">
-      <button class="tbtn primary" onclick="saveSettings()" style="flex:1">Salvar configurações</button>
+      <button class="tbtn primary" onclick="saveSettings()" style="flex:1">Salvar</button>
       <button class="tbtn" onclick="closeSettings()">Fechar</button>
     </div>
   </div>
@@ -316,21 +351,306 @@ function logout() {
   document.getElementById('login-screen').style.display = 'flex';
 }
 
-function showDash() {
+async function showDash() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dash-wrap').style.display = 'block';
-  renderStats();
-  renderTable();
-  renderTrash();
+
+  // Tenta carregar do Supabase (sync bidirecional)
+  const sbData = await loadFromSupabase();
+  if (sbData.length > 0) {
+    // Se Supabase tem dados, sincroniza com localStorage
+    const local = getProposals();
+    const merged = [...sbData];
+    // Prioriza versão mais recente
+    local.forEach(lp => {
+      const idx = merged.findIndex(sp => sp.id === lp.id);
+      if (idx === -1) merged.push(lp);
+      else if (lp.updatedAt > merged[idx].updatedAt) merged[idx] = lp;
+    });
+    setProposals(merged);
+  }
+
+  try {
+    renderStats();
+    renderTable();
+    renderTrash();
+  } catch(err) {
+    // Erro no render: mostra alerta sem apagar dados
+    const body = document.getElementById('prop-body');
+    if (body) body.innerHTML = `<tr><td colspan="5" style="padding:24px;color:#e55;font-size:13px">
+      ⚠️ Erro ao carregar propostas. Seus dados estão seguros.<br>
+      <small style="color:#888">${err.message}</small><br><br>
+      <button onclick="location.reload()" style="margin-top:8px;padding:6px 14px;border:1px solid #444;background:none;color:#ccc;border-radius:6px;cursor:pointer;font-family:inherit">
+        Tentar recarregar
+      </button>
+    </td></tr>`;
+    document.getElementById('table-wrap').style.display = 'block';
+    document.getElementById('empty-state').style.display = 'none';
+    console.error('showDash render error:', err);
+  }
+}
+
+/* ── BACKUP / RESTORE ── */
+async function backupProposals() {
+  const proposals = JSON.parse(localStorage.getItem('pk_proposals') || '[]');
+
+  // Sync com Supabase antes de fazer backup
+  for (const p of proposals) {
+    await syncToSupabase(p);
+  }
+
+  const data = {
+    propostas:  proposals,
+    lixeira:    JSON.parse(localStorage.getItem('pk_proposals_trash') || '[]'),
+    exportadoEm: new Date().toISOString(),
+    versao: '1',
+    supabase: true
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `propostas-backup-${dateBR()}.json`;
+  a.click();
+  alert('✓ Backup baixado e sincronizado com Supabase');
+}
+
+function restoreBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data.propostas)) throw new Error('Arquivo inválido');
+      const count = data.propostas.length;
+      if (!confirm(`Restaurar ${count} proposta(s) do backup de ${data.exportadoEm?.slice(0,10) || '?'}?\n\nIsso substituirá as propostas atuais.`)) return;
+      localStorage.setItem('pk_proposals',       JSON.stringify(data.propostas));
+      localStorage.setItem('pk_proposals_trash', JSON.stringify(data.lixeira || []));
+      renderStats(); renderTable(); renderTrash();
+      alert(`✓ ${count} proposta(s) restauradas com sucesso.`);
+    } catch(err) {
+      alert('Erro ao restaurar: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 /* ─────────────────────────────── */
 
 const STATUS_LABELS = { neg: 'Negociação', env: 'Enviada', ok: 'Fechada', tpl: 'Template' };
-const STATUS_CLASS  = { neg: 's-neg',       env: 's-env',   ok: 's-ok',   tpl: 's-tpl'   };
+
+/* ── SUPABASE ── */
+const SUPABASE_URL = 'https://ifstkixcpssqtbzrklzc.supabase.co/rest/v1';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmc3RraXhjcHNzcXRienJrbHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MjQ5MjMsImV4cCI6MjA5NjEwMDkyM30.0SXA-dDOlltjz8pr6LYLhgZAsLf70kXu3vdlggKVuSc';
+
+async function syncToSupabase(proposal) {
+  const HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'apikey': SUPABASE_KEY
+  };
+  const data = {
+    id: proposal.id, client: proposal.client, niche: proposal.niche || null,
+    value: proposal.value || null, status: proposal.status || 'neg',
+    date: proposal.date || null, slug: proposal.slug || null,
+    blocks: proposal.blocks || null, html: proposal.html || null,
+    published: proposal.published || false, locked: proposal.locked || false,
+    createdat: proposal.createdAt || null, updatedat: proposal.updatedAt || null
+  };
+  try {
+    if (proposal.slug) {
+      const check = await fetch(
+        `${SUPABASE_URL}/propostas?slug=eq.${encodeURIComponent(proposal.slug)}&select=id`,
+        { headers: HEADERS }
+      );
+      if (check.ok) {
+        const rows = await check.json();
+        if (rows.length > 0) {
+          const patch = await fetch(
+            `${SUPABASE_URL}/propostas?slug=eq.${encodeURIComponent(proposal.slug)}`,
+            { method: 'PATCH', headers: { ...HEADERS, 'Prefer': 'return=minimal' }, body: JSON.stringify(data) }
+          );
+          if (!patch.ok) console.warn('Supabase PATCH falhou:', patch.status);
+          return patch.ok;
+        }
+      }
+    }
+    const insert = await fetch(`${SUPABASE_URL}/propostas`, {
+      method: 'POST',
+      headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify(data)
+    });
+    if (!insert.ok) console.warn('Supabase INSERT falhou:', insert.status, await insert.text().catch(()=>''));
+    return insert.ok;
+  } catch(e) {
+    console.warn('Supabase exception:', e.message);
+    return false;
+  }
+}
+
+async function loadFromSupabase() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/propostas?select=*`, {
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': SUPABASE_KEY
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      // Normaliza colunas lowercase do Postgres → camelCase do app
+      return (data || []).map(r => ({
+        ...r,
+        createdAt: r.createdAt || r.createdat || null,
+        updatedAt: r.updatedAt || r.updatedat || null
+      }));
+    }
+  } catch(e) {
+    console.warn('Supabase load falhou:', e.message);
+  }
+  return [];
+}
+
+/* ── DATA E FILTRO ── */
+const dateBR = () => new Date().toLocaleDateString('pt-BR', {
+  timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit'
+}).split('/').reverse().join('-');
+
+// Formata YYYY-MM-DD → "Jun 2026"
+function fmtDate(iso) {
+  if (!iso) return '-';
+  const [y, m] = iso.split('-');
+  if (!y || !m) return iso;
+  const mes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${mes[parseInt(m, 10) - 1] || m} ${y}`;
+}
+
+// Texto de data ("Junho de 2026" ou "Jun 2026") → "2026-06-01"
+function txtDateToISO(txt) {
+  if (!txt) return '';
+  const t = txt.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(t)) return t; // ja eh ISO
+  const long  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const short = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mt = t.match(/([A-Za-zçÇ]+).*?(\d{4})/);
+  if (!mt) return '';
+  const nome = mt[1].toLowerCase();
+  let idx = long.findIndex(x => x.toLowerCase() === nome);
+  if (idx === -1) idx = short.findIndex(x => x.toLowerCase() === nome);
+  if (idx === -1) return '';
+  return `${mt[2]}-${String(idx + 1).padStart(2, '0')}-01`;
+}
+
+let activeFilter = 'all';
+let sortBy = { field: 'updatedAt', asc: false }; // padrão: mais recente primeiro
+
+function dateRangeBR(preset) {
+  const today = dateBR();
+  if (preset === 'today') return { from: today, to: today };
+  try {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    if (preset === 'week') {
+      // Segunda a domingo
+      const dayOfWeek = now.getDay();
+      const daysBack = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const mon = new Date(now);
+      mon.setDate(now.getDate() - daysBack);
+      const from = mon.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+      return { from, to: today };
+    }
+    if (preset === 'month') {
+      const from = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+      return { from, to: today };
+    }
+    if (preset === 'year') return { from: `${now.getFullYear()}-01-01`, to: today };
+  } catch(e) {
+    console.error('dateRangeBR error:', e);
+  }
+  return null;
+}
+
+function setFilter(preset) {
+  activeFilter = preset;
+  document.querySelectorAll('.filter-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.filter === preset)
+  );
+  const labels = { all: 'Todas as propostas', today: 'Propostas de hoje', week: 'Propostas desta semana', month: 'Propostas deste mês', year: 'Propostas deste ano' };
+  const el = document.getElementById('table-section-title');
+  if (el) el.textContent = labels[preset] || 'Propostas';
+  renderStats();
+  renderTable();
+}
+
+const STATUS_CLASS = { neg: 's-neg', env: 's-env', ok: 's-ok', tpl: 's-tpl' };
+
+function setSortBy(field) {
+  if (sortBy.field === field) {
+    sortBy.asc = !sortBy.asc;
+  } else {
+    sortBy.field = field;
+    sortBy.asc = false; // padrão desc (mais recente primeiro)
+  }
+  updateSortHeaders();
+  renderTable();
+}
+
+function updateSortHeaders() {
+  const fieldMap = { client: 'h-client', value: 'h-value', status: 'h-status', createdAt: 'h-date' };
+  Object.values(fieldMap).forEach(id => {
+    const th = document.getElementById(id);
+    if (th) th.classList.remove('sort-active');
+  });
+  const activeTh = document.getElementById(fieldMap[sortBy.field]);
+  if (activeTh) {
+    activeTh.classList.add('sort-active');
+    const ind = activeTh.querySelector('.sort-ind');
+    if (ind) ind.textContent = sortBy.asc ? '▲' : '▼';
+  }
+}
+
+function getFiltered() {
+  try {
+    let all = getProposals();
+
+    // Filtra por período
+    if (activeFilter !== 'all') {
+      const range = dateRangeBR(activeFilter);
+      if (range) {
+        all = all.filter(p => p.createdAt && p.createdAt >= range.from && p.createdAt <= range.to);
+      }
+    }
+
+    // Ordena
+    all.sort((a, b) => {
+      let aVal = a[sortBy.field] || '';
+      let bVal = b[sortBy.field] || '';
+
+      // Se é número, converte
+      if (sortBy.field === 'value') {
+        aVal = parseFloat(aVal.replace(/\D/g, '')) || 0;
+        bVal = parseFloat(bVal.replace(/\D/g, '')) || 0;
+      }
+
+      const cmp = typeof aVal === 'string'
+        ? aVal.localeCompare(bVal, 'pt-BR')
+        : (aVal > bVal ? 1 : aVal < bVal ? -1 : 0);
+
+      return sortBy.asc ? cmp : -cmp;
+    });
+
+    return all;
+  } catch(e) {
+    return getProposals(); // fallback seguro
+  }
+}
 
 function getProposals() {
-  try { return JSON.parse(localStorage.getItem('pk_proposals') || '[]'); } catch { return []; }
+  try {
+    const arr = JSON.parse(localStorage.getItem('pk_proposals') || '[]');
+    // Garante createdAt (usado por exibicao e filtro): deriva do texto da data se faltar
+    return arr.map(p => p.createdAt ? p : { ...p, createdAt: txtDateToISO(p.date) || null });
+  } catch { return []; }
 }
 function setProposals(arr) {
   localStorage.setItem('pk_proposals', JSON.stringify(arr));
@@ -338,7 +658,7 @@ function setProposals(arr) {
 
 /* ── STATS ── */
 function renderStats() {
-  const proposals = getProposals();
+  const proposals = getFiltered();
   const real  = proposals.filter(p => p.status !== 'tpl');
   const neg   = real.filter(p => p.status === 'neg').length;
   const ok    = real.filter(p => p.status === 'ok').length;
@@ -359,7 +679,8 @@ function renderStats() {
 
 /* ── TABLE ── */
 function renderTable() {
-  const proposals = getProposals();
+  updateSortHeaders();
+  const proposals = getFiltered();
   const tbody = document.getElementById('prop-body');
   const empty = document.getElementById('empty-state');
   const tableWrap = document.getElementById('table-wrap');
@@ -382,10 +703,10 @@ function renderTable() {
     const editLabel = hasBlocks ? 'Editar' : 'Construir';
     return `<tr data-id="${p.id}">
       <td>
-        <div class="client-name">${esc(p.client)}</div>
+        <div class="client-name">${esc(p.client)}${p.locked ? '<span class="locked-badge">🔒</span>' : ''}</div>
         ${p.niche ? `<div class="client-niche">${esc(p.niche)}</div>` : ''}
       </td>
-      <td><span class="value">${esc(p.value || '-')}</span></td>
+      <td><span class="value" data-val="${esc(p.value || '-')}">${pricesHidden ? '• • •' : esc(p.value || '-')}</span></td>
       <td>
         <select class="status-select ${cls}" onchange="changeStatus('${p.id}', this)">
           ${Object.entries(STATUS_LABELS).map(([v,l]) =>
@@ -393,15 +714,30 @@ function renderTable() {
           ).join('')}
         </select>
       </td>
-      <td class="date-cell">${esc(p.date || '-')}</td>
+      <td class="date-cell">${fmtDate(p.createdAt)}</td>
       <td>
         <div class="actions">
-          ${(p.source==='vercel'||p.published) && p.slug ? `<a class="btn-act act-open" href="/${p.slug}" target="_blank">Abrir →</a>` : (p.html ? `<button class="btn-act act-open" onclick="viewProposal('${p.id}')">Abrir →</button>` : '')}
-          ${(p.source==='vercel'||p.published) && p.slug ? `<button class="btn-act act-copy" onclick="copyLink('${p.slug}',this)">Copiar link</button>` : ''}
-          <a class="btn-act act-edit" href="builder.html?id=${p.id}">${editLabel}</a>
-          ${p.html ? `<button class="btn-act act-publish" onclick="publishProposal('${p.id}')" title="Publicar no Vercel">↑ Publicar</button>` : ''}
-          ${p.html ? `<button class="btn-act act-export" onclick="exportProposal('${p.id}')">Exportar</button>` : ''}
+          ${p.slug
+            ? (p.locked
+                ? `<button class="btn-act act-open" onclick="viewLockedScreen()">Abrir →</button>`
+                : p.html
+                    ? `<a class="btn-act act-open" href="/ver?s=${p.slug}" target="_blank">Abrir →</a>`
+                    : `<a class="btn-act act-open" href="/${p.slug}" target="_blank">Abrir →</a>`)
+            : (p.html ? `<button class="btn-act act-open" onclick="viewProposal('${p.id}')">Abrir →</button>` : '')}
           <button class="btn-act act-delete" onclick="moveToTrash('${p.id}')" title="Mover para lixeira">🗑</button>
+          <div class="action-menu">
+            <button class="action-dots" onclick="toggleMenu('${p.id}',event)">···</button>
+            <div class="action-dropdown" id="dd-${p.id}">
+              <a class="dd-item" href="builder.html?id=${p.id}">✏️ Editar</a>
+              <button class="dd-item" onclick="duplicateProposal('${p.id}')">⧉ Duplicar</button>
+              ${p.slug ? `<button class="dd-item" onclick="copyVerLink('${p.slug}',this);closeMenus()">🔗 Copiar link</button>` : ''}
+              ${p.html ? `<button class="dd-item" onclick="exportProposal('${p.id}');closeMenus()">⬇ Exportar HTML</button>` : ''}
+              <div class="dd-sep"></div>
+              <button class="dd-item ${p.locked ? 'dd-unlock' : 'dd-lock'}" onclick="toggleLock('${p.id}')">
+                ${p.locked ? '🔓 Destravar proposta' : '🔒 Travar proposta'}
+              </button>
+            </div>
+          </div>
         </div>
       </td>
     </tr>`;
@@ -415,7 +751,7 @@ function changeStatus(id, selectEl) {
   const p = proposals.find(p => p.id === id);
   if (!p) return;
   p.status = newStatus;
-  p.updatedAt = new Date().toISOString().slice(0, 10);
+  p.updatedAt = dateBR();
   setProposals(proposals);
   // Atualiza a classe visual do select sem re-renderizar a tabela toda
   selectEl.className = `status-select ${STATUS_CLASS[newStatus] || 's-tpl'}`;
@@ -423,10 +759,128 @@ function changeStatus(id, selectEl) {
 }
 
 /* ── EXPORT ── */
+function duplicateProposal(id) {
+  const proposals = getProposals();
+  const src = proposals.find(p => p.id === id);
+  if (!src) return;
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.id        = Math.random().toString(36).slice(2, 8);
+  copy.client    = src.client + ' (cópia)';
+  copy.slug      = null;
+  copy.published = false;
+  copy.status    = 'neg';
+  copy.html      = null;
+  copy.createdAt = dateBR();
+  copy.updatedAt = copy.createdAt;
+  proposals.unshift(copy);
+  setProposals(proposals);
+  window.location.href = 'builder.html?id=' + copy.id;
+}
+
+/* ── TOGGLE PREÇOS ── */
+let pricesHidden = false;
+function togglePrices() {
+  pricesHidden = !pricesHidden;
+  const btn = document.getElementById('price-toggle-btn');
+  if (btn) btn.textContent = pricesHidden ? '*** ···' : 'R$ ···';
+  document.querySelectorAll('.value').forEach(el => {
+    el.textContent = pricesHidden ? '• • •' : el.dataset.val || el.textContent;
+  });
+  renderTable();
+}
+
+/* ── DROPDOWN MENU ── */
+function toggleMenu(id, e) {
+  e.stopPropagation();
+  const dd = document.getElementById(`dd-${id}`);
+  const isOpen = dd.classList.contains('open');
+  closeMenus();
+  if (!isOpen) {
+    dd.classList.add('open');
+    positionDropdown(dd, e.currentTarget);
+  }
+}
+function positionDropdown(dd, btn) {
+  const r = btn.getBoundingClientRect();
+  const ddW = dd.offsetWidth || 170;
+  // Alinha a borda direita do menu com a do botao, abrindo pra baixo
+  let left = r.right - ddW;
+  let top = r.bottom + 6;
+  // Se nao couber embaixo, abre pra cima
+  if (top + dd.offsetHeight > window.innerHeight - 8) {
+    top = r.top - dd.offsetHeight - 6;
+  }
+  dd.style.left = Math.max(8, left) + 'px';
+  dd.style.top = Math.max(8, top) + 'px';
+}
+function closeMenus() {
+  document.querySelectorAll('.action-dropdown.open').forEach(d => d.classList.remove('open'));
+}
+document.addEventListener('click', closeMenus);
+// Fecha ao rolar/redimensionar (o menu fixo nao acompanha a linha)
+window.addEventListener('scroll', closeMenus, true);
+window.addEventListener('resize', closeMenus);
+
+/* ── LOCK / TELA CONGELADA ── */
+function buildLockedHTML() {
+  const wa = localStorage.getItem('pk_whatsapp') || '';
+  const waIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
+  const btn = wa
+    ? `<a class="ctabtn" href="https://wa.me/${wa.replace(/\D/g,'')}" target="_blank">Entrar em contato&nbsp;${waIcon}</a>`
+    : `<a class="ctabtn" href="mailto:pedro.h.kunz@gmail.com" target="_blank">Entrar em contato</a>`;
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proposta desativada · Pedro Kunz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#0D0D0D;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.box{text-align:center;max-width:340px}
+.lock-icon{font-size:72px;margin:0 auto 32px;opacity:0.6}
+h1{font-size:21px;font-weight:800;color:#EDE7DA;margin-bottom:12px;letter-spacing:-.3px;line-height:1.3}
+p{font-size:13px;color:#444;line-height:1.9;margin-bottom:36px}
+.ctabtn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.75);text-decoration:none;padding:13px 24px;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;transition:background .2s,border-color .2s,color .2s}
+.ctabtn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.18);color:#fff}
+.credit{margin-top:48px;font-size:10px;color:#222;text-transform:uppercase;letter-spacing:2px}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="lock-icon">🔒</div>
+  <h1>Esta proposta está congelada</h1>
+  <p>Este link foi desativado temporariamente.<br>Entre em contato para reativar.</p>
+  ${btn}
+  <div class="credit">Pedro Kunz</div>
+</div>
+</body>
+</html>`;
+}
+
+function viewLockedScreen() {
+  const blob = new Blob([buildLockedHTML()], { type: 'text/html' });
+  window.open(URL.createObjectURL(blob), '_blank');
+}
+
+function toggleLock(id) {
+  const proposals = getProposals();
+  const p = proposals.find(p => p.id === id);
+  if (!p) return;
+  p.locked = !p.locked;
+  p.updatedAt = dateBR();
+  setProposals(proposals);
+  closeMenus();
+  renderTable();
+}
+
 function viewProposal(id) {
   const p = getProposals().find(p => p.id === id);
-  if (!p || !p.html) return;
-  const blob = new Blob([p.html], { type: 'text/html' });
+  if (!p) return;
+  const html = p.locked ? buildLockedHTML() : p.html;
+  if (!html) return;
+  const blob = new Blob([html], { type: 'text/html' });
   window.open(URL.createObjectURL(blob), '_blank');
 }
 
@@ -437,17 +891,23 @@ function getConfig() {
     ghRepo:  localStorage.getItem('pk_gh_repo')  || ''
   };
 }
-function openSettings() {
-  const c = getConfig();
-  document.getElementById('cfg-token').value = c.ghToken;
-  document.getElementById('cfg-repo').value  = c.ghRepo;
+let _pendingPublishId = null;
+
+function openSettings(pendingId) {
+  document.getElementById('cfg-clarity').value  = localStorage.getItem('pk_clarity_id') || 'x1gx53km8i';
+  document.getElementById('cfg-whatsapp').value = localStorage.getItem('pk_whatsapp')   || '';
   document.getElementById('settings-modal').classList.add('open');
 }
-function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+  _pendingPublishId = null;
+}
 function saveSettings() {
-  localStorage.setItem('pk_gh_token', document.getElementById('cfg-token').value.trim());
-  localStorage.setItem('pk_gh_repo',  document.getElementById('cfg-repo').value.trim());
+  localStorage.setItem('pk_clarity_id', document.getElementById('cfg-clarity').value.trim());
+  localStorage.setItem('pk_whatsapp',   document.getElementById('cfg-whatsapp').value.trim());
+  const pending = _pendingPublishId;
   closeSettings();
+  if (pending) publishProposal(pending);
 }
 document.getElementById('settings-modal').addEventListener('click', function(e) {
   if (e.target === this) closeSettings();
@@ -455,75 +915,56 @@ document.getElementById('settings-modal').addEventListener('click', function(e) 
 
 /* ── PUBLISH VIA GITHUB API ── */
 async function publishProposal(id) {
-  const { ghToken, ghRepo } = getConfig();
-  if (!ghToken || !ghRepo) {
-    openSettings();
-    return;
-  }
-
   const proposals = getProposals();
   const p = proposals.find(p => p.id === id);
-  if (!p || !p.html) { alert('Proposta sem HTML. Abra no builder e salve novamente.'); return; }
+  if (!p) return;
+
+  if (!p.html) {
+    const go = confirm('Esta proposta não tem HTML gerado ainda.\n\nAbrir no builder para editar e gerar o HTML?');
+    if (go) window.location.href = `builder.html?id=${id}`;
+    return;
+  }
   if (!p.slug) { alert('Defina um slug no builder antes de publicar.'); return; }
 
-  // Loading state
-  const btn = document.querySelector(`tr[data-id="${id}"] .act-publish`);
-  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
-
-  const path    = `${p.slug}/index.html`;
-  const apiUrl  = `https://api.github.com/repos/${ghRepo}/contents/${path}`;
-  const headers = {
-    'Authorization': `Bearer ${ghToken}`,
-    'Accept': 'application/vnd.github.v3+json',
-    'Content-Type': 'application/json'
-  };
-
   try {
-    // Busca SHA se o arquivo já existe (necessário para atualizar)
-    let sha;
-    const check = await fetch(apiUrl, { headers });
-    if (check.ok) sha = (await check.json()).sha;
+    // Publica no Supabase — sem precisar de GitHub
+    const htmlToPublish = p.locked ? buildLockedHTML() : p.html;
+    const ok = await syncToSupabase({ ...p, html: htmlToPublish });
 
-    // Envia para o GitHub
-    const res = await fetch(apiUrl, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({
-        message: `proposta: ${p.slug}`,
-        content: btoa(unescape(encodeURIComponent(p.html))),
-        ...(sha ? { sha } : {})
-      })
-    });
-
-    if (res.ok) {
+    if (ok) {
       const idx = proposals.findIndex(q => q.id === id);
       proposals[idx].published = true;
       setProposals(proposals);
       renderTable();
-      // Mostra feedback com URL
-      const url = `${location.origin}/${p.slug}`;
+
+      const url = `${location.origin}/ver?s=${p.slug}`;
       const msg = document.createElement('div');
-      msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0A2A0A;color:#4CAF50;border:1px solid #1a4a1a;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;line-height:1.6;max-width:320px';
-      msg.innerHTML = `✓ Publicado no GitHub!<br><span style="font-weight:400;font-size:11px;color:#aaa">Deploy em ~30s · <a href="${url}" target="_blank" style="color:#4CAF50">${url}</a></span>`;
+      msg.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0A2A0A;color:#4CAF50;border:1px solid #1a4a1a;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;line-height:1.6;max-width:340px';
+      msg.innerHTML = `✓ Publicado!<br>
+        <span style="font-weight:400;font-size:11px;color:#aaa">
+          <a href="${url}" target="_blank" style="color:#4CAF50">${url}</a>
+        </span><br>
+        <button onclick="navigator.clipboard.writeText('${url}');this.textContent='Copiado!'" style="margin-top:8px;padding:4px 10px;border:1px solid #1a4a1a;background:none;color:#4CAF50;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit">Copiar link</button>`;
       document.body.appendChild(msg);
-      setTimeout(() => msg.remove(), 8000);
+      setTimeout(() => msg.remove(), 10000);
     } else {
-      const err = await res.json();
-      alert('Erro ao publicar: ' + (err.message || 'Verifique o token e repositório em ⚙ Configurações.'));
-      if (btn) { btn.textContent = '↑ Publicar'; btn.disabled = false; }
+      alert('Erro ao publicar no Supabase. Tente novamente.');
     }
   } catch(e) {
-    alert('Erro de conexão: ' + e.message);
-    if (btn) { btn.textContent = '↑ Publicar'; btn.disabled = false; }
+    alert('Erro: ' + e.message);
   }
 }
 
 function copyLink(slug, btn) {
   const url = `${location.origin}/${slug}`;
   navigator.clipboard.writeText(url).then(() => {
-    btn.textContent = '✓ Copiado';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copiar link'; btn.classList.remove('copied'); }, 2000);
+    if (btn) { btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = '🔗 Copiar link'; }, 2000); }
+  });
+}
+function copyVerLink(slug, btn) {
+  const url = `${location.origin}/ver?s=${slug}`;
+  navigator.clipboard.writeText(url).then(() => {
+    if (btn) { btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = '🔗 Copiar link'; }, 2000); }
   });
 }
 
@@ -640,16 +1081,20 @@ function esc(s) {
 /* ── IMPORT FROM VERCEL DASHBOARD ── */
 
 const VERCEL_PROPOSALS = [
-  { client: 'Adrianna Mancilha',  niche: 'Psicologia · Técnica SET',  value: 'R$ 599', status: 'neg', date: 'Mai 2026', slug: 'adrianna-mancilha'  },
-  { client: 'Lins Vieira',        niche: 'Advocacia Trabalhista',      value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'lins-vieira'         },
-  { client: 'EO SPORTS',          niche: 'Portal de Noticias',         value: 'R$ 997', status: 'env', date: 'Mai 2026', slug: 'eosports'            },
-  { client: 'Erica Stefano',      niche: 'Estetica · Tatuape SP',      value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'erica-stefano'       },
-  { client: 'Angelica Oliveira',  niche: 'Estetica · Tatuape SP',      value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'angelica-oliveira'   },
-  { client: 'Estetica Integrada', niche: 'Clinica de Estetica',        value: 'R$ 599', status: 'env', date: 'Mai 2026', slug: 'estetica-integrada'  },
-  { client: 'Marcia Lira',        niche: 'Escola de Estetica · SP',    value: 'R$ 999', status: 'neg', date: 'Mai 2026', slug: 'marcia-lira'         },
-  { client: 'Rancho do Deminas',  niche: 'Rancho · Eventos',           value: 'R$ 599', status: 'neg', date: 'Mai 2026', slug: 'rancho-deminas'      },
-  { client: 'Site Completo',      niche: 'Template Generico',          value: 'R$ 699', status: 'tpl', date: 'Template', slug: 'site-completo'       },
-  { client: 'Advogado (Template)',niche: 'Advocacia, Generico',        value: 'R$ 599', status: 'tpl', date: 'Template', slug: 'adv'                 },
+  { client: 'Cleide Nobre Imóveis',  niche: 'Imobiliária',                    value: 'R$ 999',   status: 'env', date: 'Mai 2026', slug: 'cleide-nobre-imoveis' },
+  { client: 'Lucas Lopes',           niche: 'Extração de mármore',            value: 'R$ 899',   status: 'env', date: 'Mai 2026', slug: 'lucas-lopes'         },
+  { client: 'IV Soluções Elétrica',  niche: 'Engenharia Elétrica · Ceará',    value: 'R$ 1.499', status: 'env', date: 'Jun 2026', slug: 'iv-solucoes'       },
+  { client: 'Monteiro',              niche: 'Defesa da criança e adolescente', value: '1999',     status: 'env', date: 'Mai 2026', slug: 'monteiro'          },
+  { client: 'Adrianna Mancilha',     niche: 'Psicologia · Técnica SET',       value: 'R$ 599',   status: 'neg', date: 'Mai 2026', slug: 'adrianna-mancilha'   },
+  { client: 'Lins Vieira',           niche: 'Advocacia Trabalhista',          value: 'R$ 599',   status: 'env', date: 'Mai 2026', slug: 'lins-vieira'        },
+  { client: 'EO SPORTS',             niche: 'Portal de Noticias',             value: 'R$ 997',   status: 'env', date: 'Mai 2026', slug: 'eosports'           },
+  { client: 'Erica Stefano',         niche: 'Estetica · Tatuape SP',          value: 'R$ 599',   status: 'env', date: 'Mai 2026', slug: 'erica-stefano'      },
+  { client: 'Angelica Oliveira',     niche: 'Estetica · Tatuape SP',          value: 'R$ 599',   status: 'env', date: 'Mai 2026', slug: 'angelica-oliveira'  },
+  { client: 'Estetica Integrada',    niche: 'Clinica de Estetica',            value: 'R$ 599',   status: 'env', date: 'Mai 2026', slug: 'estetica-integrada' },
+  { client: 'Marcia Lira',           niche: 'Escola de Estetica · SP',        value: 'R$ 999',   status: 'neg', date: 'Mai 2026', slug: 'marcia-lira'        },
+  { client: 'Rancho do Deminas',     niche: 'Rancho · Eventos',               value: 'R$ 599',   status: 'neg', date: 'Mai 2026', slug: 'rancho-deminas'     },
+  { client: 'Site Completo',         niche: 'Template Generico',              value: 'R$ 699',   status: 'tpl', date: 'Template', slug: 'site-completo'      },
+  { client: 'Advogado (Template)',   niche: 'Advocacia, Generico',            value: 'R$ 599',   status: 'tpl', date: 'Template', slug: 'adv'                },
 ];
 
 function importFromVercel() {
@@ -666,7 +1111,7 @@ function importFromVercel() {
     return;
   }
 
-  const now = new Date().toISOString().slice(0, 10);
+  const now = dateBR();
   const imported = toAdd.map(p => ({
     id:        Math.random().toString(36).slice(2, 8),
     client:    p.client,
